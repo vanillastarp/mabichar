@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"mabichar.admin_Talent_masters"}],"uuid":"3286d7c6feac4faebb5d96e61f8b6061"}

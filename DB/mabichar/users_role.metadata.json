@@ -1,0 +1,1 @@
+{"options":{"viewOn":"users","pipeline":[{"$lookup":{"from":"roles","localField":"role","foreignField":"roleid","as":"roles"}},{"$unwind":{"path":"$roles"}},{"$addFields":{"rolename":"$roles.rolename"}}]},"indexes":[],"uuid":""}

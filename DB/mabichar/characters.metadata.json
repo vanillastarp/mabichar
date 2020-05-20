@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"mabichar.characters"}],"uuid":"f6c773ccc10b4bbd9f1a922981d9d502"}
