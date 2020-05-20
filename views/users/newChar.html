@@ -1,0 +1,79 @@
+{{ define "users/newChar-head" }}
+
+{{ end }}
+
+
+{{ define "users/newChar-body" }}
+<div class="container">
+    <h1 class="mt-4">新增角色</h1>
+    <hr>
+    <div class="jumbotron">
+        <form  method="POST" action="/user/newchar">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputCharname">角色名稱</span>
+                    </div>
+                    <input type="text" name="inputCharname" id="inputCharname" class="form-control" placeholder="輸入角色名稱" aria-label="角色名稱" aria-describedby="inputCharname">
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputBirthday">角色建立日期</span>
+                    </div>
+                    <input type="date" name="inputBirthday" id="inputBirthday" class="form-control" placeholder="輸入選擇日期" aria-label="角色建立日期" aria-describedby="inputBirthday">
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="inputWeekborn">角色生日</label>
+                    </div>
+                    <select class="custom-select" name="inputWeekborn" id="inputWeekborn">
+                        <option selected>請選擇</option>
+                        <option value="7">立春(Imbolic) 星期日</option>
+                        <option value="1">春分(Alban Eiler) 星期一</option>
+                        <option value="2">入夏(Beltane) 星期二</option>
+                        <option value="3">立夏(Alban Heruin) 星期三</option>
+                        <option value="4">秋收(Lughnasadh) 星期四</option>
+                        <option value="5">秋收節(Alban Elved) 星期五</option>
+                        <option value="6">山夏(Samhain) 星期六</option>
+                    </select>
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="inputRace">角色種族</label>
+                    </div>
+                    <select class="custom-select" name="inputRace" id="inputRace">
+                        <option selected>請選擇</option>
+                        <option value="1">人類</option>
+                        <option value="2">精靈</option>
+                        <option value="3">巨人</option>
+                        <option value="4" disabled>X寵物</option>
+                        <option value="5" disabled>X夥伴</option>
+                    </select>
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="inputServer">伺服器</label>
+                    </div>
+                    <select class="custom-select" name="inputServer" id="inputServer">
+                        <option selected>請選擇</option>
+                        <option value="1">貝婷伺服器</option>
+                        <option value="2">愛麗沙伺服器</option>
+                        <option value="3">安黛莉伺服器(~2020/4/23)</option>
+                        <option value="4">凱琳伺服器(~2020/4/23)</option>
+                        <option value="5">迪恩伺服器(~2020/4/23)</option>
+                        <option value="6">娜歐伺服器</option>
+                    </select>
+                </div>
+                <div class="input-group mb-3">
+                    <a href="/user/char" class="btn btn-info active" role="button" aria-pressed="true">回角色列表</a>
+                    <div class="col text-center">
+                        <button class="btn btn-primary" type="submit">新增</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    </div>
+</div>
+{{ end }}

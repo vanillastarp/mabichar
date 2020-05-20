@@ -1,0 +1,64 @@
+/				[get]		主頁面
+/register			[get]		註冊畫面
+/register			[post]		註冊指令
+/login				[get]		登入畫面
+/login				[post]		登入指令
+/logout				[post]		登出指令
+/forget_password		[get]		忘記密碼畫面
+/forget_password		[post]		寄出密碼指令
+/about				[get]		網頁訊息
+/readme				[get]		系統操作說明
+/share				[get]		公開角色列表
+
+使用者概觀
+/dashboard			[get]		
+
+
+使用者帳號管理
+/user				[get]		帳號資訊
+/user/edit			[get]		編輯帳號頁面
+/user/update			[post]		更新帳號資料
+/user/char			[get]		角色列表
+/user/newchar			[get]		新增角色頁面
+/user/newchar			[post]		新增角色
+#delete放在角色資訊內
+
+
+編入資料庫角色
+/char/##			[get]		角色資訊
+/char/##/detail/guild
+/char/##/detail/level
+/char/##/detail/explore_level
+/char/##/detail/ducat
+/char/##/detail/potential
+/char/##/edit			[get]		編輯角色頁面
+/char/##/update			[post]		更新角色資料
+/char/##/delete			[delete]	刪除角色
+
+/char/u/123456789012345678901234		[get]		未編入資料庫角色資訊
+/char/u/123456789012345678901234/edit	[get]		編輯未編入資料庫角色頁面
+/char/u/123456789012345678901234/update	[post]		更新未編入資料庫角色資料
+/char/u/123456789012345678901234/delete	[delete]	刪除未編入資料庫角色
+
+
+
+---------系統管理區---------
+成就管理
+/admin/game_version		[get]		遊戲改版紀錄
+/admin/achievements		[get]		成就列表
+/admin/skills			[get]		技能列表
+/admin/titles			[get]		稱號列表
+/admin/talent_masters		[get]		一代宗師列表
+/admin/pets			[get]		寵物列表
+/admin/collections		[get]		收集日誌
+/admin/events			[get]		官方活動
+/admin/story			[get]		主線列表
+/admin/servers			[get]		伺服器列表
+
+
+
+系統是由一個帳號可新增多個角色
+並可自行新增角色的經歷
+並於dashboard視覺化整個過程
+
+若對於此系統有寶貴的意見，請eMail給我，謝謝您！
