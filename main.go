@@ -9,6 +9,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/middleware/methodoverride"
 	"github.com/kataras/iris/v12/middleware/recover"
 	"github.com/kataras/iris/v12/sessions"
 
@@ -127,6 +128,12 @@ func main() {
 	})
 	app.Use(sess.Handler())
 
+	//HTTP method override
+	mo := methodoverride.New(
+		methodoverride.SaveOriginalMethod("_originalMethod"),
+	)
+	app.WrapRouter(mo)
+
 	// Load all templates from the "./views" folder
 	// where extension is ".html" and parse them
 	// using the standard `html/template` package.
@@ -169,7 +176,13 @@ func main() {
 		user.Get("/collections", GetCollections)
 		user.Get("/events", GetEvents)
 		user.Get("/stories", GetStories)
-		user.Get("/servers", GetServers)
+
+		user.Get("/servers", GetServers)                                             //列出伺服器清單
+		user.Get("/servers/create", GetServerCreate)                                 //新增伺服器表單
+		user.Post("/servers/create", PostServerCreate)                               //新增伺服器資料
+		user.Get("/servers/{serverid: int}/edit", GetServerEdit)                     //編輯伺服器表單
+		user.Put("/servers/{_id: string regexp([0-9a-f]) max(24)}", PutServerUpdate) //更新伺服器資料
+		user.Delete("/servers/{_id: string regexp([0-9a-f]) max(24)}", DelServer)    //刪除伺服器資料
 	})
 	app.PartyFunc("/", func(guest iris.Party) {
 		guest.Use(authenticatedGuest)
@@ -382,5 +395,5 @@ func RunningLog(ctx iris.Context) {
 
 func notFound(ctx iris.Context) {
 	//ctx.ViewData("message", "Did you forget something?")
-	ctx.View("errors/404.html") //設定找不到業面
+	ctx.View("errors/404.html") //設定找不到頁面
 }

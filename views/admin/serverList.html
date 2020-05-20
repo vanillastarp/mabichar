@@ -4,28 +4,29 @@
 
 {{ define "admin/serverList-body" }}
 <main role="main" class="container">
-    <div class="jumbotron">
-        <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">中文名稱</th>
-                <th scope="col">英文名稱</th>
-                <th scope="col">編輯</th>
-              </tr>
-            </thead>
-            <tbody>
-                {{ range .serverList }}
-              <tr>
-                <th scope="row">{{ .serverid }}</th>
-                <td>{{ .serverName }}</td>
-                <td>{{ .serverEngName }}</td>
-                <td><a class="btn btn-primary" href="/admin/servers/{{ .serverid }}/edit" role="button">編輯</a></td>
-              </tr>
-              {{ end }}
-            </tbody>
-          </table>
-          
-    </div>
+  <p class="text-right">
+    <span>{{ .message }}</span>
+    <a class="btn btn-primary" href="/admin/servers/create" role="button">新增伺服器</a>
+  </p>
+  <table class="table table-sm table-bordered">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">中文名稱</th>
+        <th scope="col">英文名稱</th>
+        <th scope="col">編輯</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{ range .serverList }}
+      <tr>
+        <th scope="row">{{ .serverid }}</th>
+        <td>{{ .serverName }}</td>
+        <td>{{ .serverEngName }}</td>
+        <td><a class="btn btn-primary" href="/admin/servers/{{ .serverid }}/edit" role="button">編輯</a></td>
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
 </main>
 {{ end }}
