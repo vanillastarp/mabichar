@@ -32,6 +32,8 @@ func GetAchievements(ctx iris.Context) {
 
 //GetSkills 技能列表
 func GetSkills(ctx iris.Context) {
+	// session := sessions.Get(ctx)
+
 	var result []bson.M
 	coll := DBSource.db.Collection("admin_Skills")
 	cur, err := coll.Find(context.Background(), bson.M{})
@@ -139,7 +141,7 @@ func PostServerCreate(ctx iris.Context) {
 
 	if err != nil {
 		//log.Fatal(err)
-		session.SetFlash("msg", "發生錯誤，可能原因為重複編號: "+err.Error())
+		session.SetFlash("msg", "發生錯誤，可能原因為重複編號.")
 	} else {
 		log.Println("Added a new server with objectID: ", insertResult.InsertedID)
 		session.SetFlash("msg", "已成功新增一筆伺服器")
@@ -208,12 +210,12 @@ func PutServerUpdate(ctx iris.Context) {
 		result, err := coll.UpdateOne(context.TODO(), filter, updateData)
 		if err != nil {
 			//log.Fatal(err)
-			session.SetFlash("msg", "[PutServerUpdate]發生錯誤，可能原因為重複編號 err:"+err.Error())
+			session.SetFlash("msg", "發生錯誤，可能原因為重複編號.")
 		} else {
 			if result.ModifiedCount == 1 {
 				session.SetFlash("msg", "更新成功")
 			} else {
-				session.SetFlash("msg", "更新異常")
+				session.SetFlash("msg", "更新異常，您可能未異動資料")
 			}
 		}
 	}

@@ -2,31 +2,28 @@
 <style> body{ width: 100%;} </style>
 {{ end }}
 
-
-
 {{ define "register-body" }}
 <form method="POST" action="/register">
+    <div class="text-center">{{ .message }}</div>
     <div class="card col-md-6 offset-md-3" style="margin-top:50px;">
-        <div class="card-header">
-            註冊帳號
-        </div>
+        <div class="card-header">註冊帳號</div>
         <div class="card-body">
             <div class="form-group row">
-                <label for="inputusername" class="col-sm-2 col-form-label">Username</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="inputusername">
+                <label for="inputUsername" class="col-sm-3 col-form-label">Username</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" name="inputUsername" id="inputUsername" minlength="4" maxlength="24" required/>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
-                <div class="col-sm-10">
-                    <input type="email" class="form-control" id="inputEmail">
+                <label for="inputEmail" class="col-sm-3 col-form-label">Email</label>
+                <div class="col-sm-9">
+                    <input type="email" class="form-control" name="inputEmail" id="inputEmail" required/>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="inputPassword3" class="col-sm-2 col-form-label">Password</label>
-                <div class="col-sm-10">
-                    <input type="password" class="form-control" id="inputPassword3">
+                <label for="inputPassword" class="col-sm-3 col-form-label">Password</label>
+                <div class="col-sm-9">
+                    <input type="password" class="form-control" name="inputPassword" id="inputPassword" minlength="8" required/>
                 </div>
             </div>
             <div class="row">

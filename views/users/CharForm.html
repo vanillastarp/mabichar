@@ -1,27 +1,29 @@
-{{ define "users/newChar-head" }}
+{{ define "users/CharForm-head" }}
 
 {{ end }}
 
 
-{{ define "users/newChar-body" }}
+{{ define "users/CharForm-body" }}
 <div class="container">
-    <h1 class="mt-4">新增角色</h1>
+    <h1 class="mt-4">{{ .template.banner }}角色</h1>
     <hr>
     <div class="jumbotron">
-        <form  method="POST" action="/user/newchar">
+        <form name="EditForm" method="POST" action="{{ .template.action }}">
+            <input type="hidden" name="_id" id="_id" value="{{ .charData._id.Hex }}"/>
+            <input type="hidden" name="_method" value='{{ .template.method }}'>
         <div class="row">
             <div class="col-md-6 offset-md-3">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputCharname">角色名稱</span>
                     </div>
-                    <input type="text" name="inputCharname" id="inputCharname" class="form-control" placeholder="輸入角色名稱" aria-label="角色名稱" aria-describedby="inputCharname">
+                    <input type="text" name="inputCharname" id="inputCharname" value="{{ .charData.name }}" class="form-control" placeholder="輸入角色名稱" aria-label="角色名稱" aria-describedby="inputCharname" required>
                 </div>
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputBirthday">角色建立日期</span>
                     </div>
-                    <input type="date" name="inputBirthday" id="inputBirthday" class="form-control" placeholder="輸入選擇日期" aria-label="角色建立日期" aria-describedby="inputBirthday">
+                    <input type="date" name="inputBirthday" id="inputBirthday" value="{{ .charData.birthday }}" class="form-control" placeholder="輸入選擇日期" aria-label="角色建立日期" aria-describedby="inputBirthday" required>
                 </div>
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
@@ -68,7 +70,7 @@
                 <div class="input-group mb-3">
                     <a href="/user/char" class="btn btn-info active" role="button" aria-pressed="true">回角色列表</a>
                     <div class="col text-center">
-                        <button class="btn btn-primary" type="submit">新增</button>
+                        <button class="btn btn-primary" type="submit">{{ .template.button }}</button>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,31 @@
+{{ define "admin/skillsList-head" }}
+    <link href="/static/css/char.css" rel="stylesheet">
+{{ end }}
+
+{{ define "admin/skillsList-body" }}
+<main role="main" class="container">
+    <div class="jumbotron">
+        <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">技能名稱</th>
+                <th scope="col">開放等級</th>
+                <th scope="col">編輯</th>
+              </tr>
+            </thead>
+            <tbody>
+                {{ range .skillsList }}
+              <tr>
+                <th scope="row">{{ .skillid }}</th>
+                <td>{{ .skillName }}</td>
+                <td>{{ .maxlv }}</td>
+                <td><a class="btn btn-primary" href="/admin/skills/{{ .skillid }}/edit" role="button">編輯</a></td>
+              </tr>
+              {{ end }}
+            </tbody>
+          </table>
+          
+    </div>
+</main>
+{{ end }}

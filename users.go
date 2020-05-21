@@ -4,9 +4,11 @@ import (
 	"context"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/sessions"
@@ -62,7 +64,7 @@ func GetCharList(ctx iris.Context) {
 	coll := DBSource.db.Collection("characters")
 
 	query := bson.M{
-		"uid": session.Get("_id"),
+		"uid": session.Get("_id"), //用使用者的_id去找characters collection的uid
 	}
 
 	// err := coll.FindOne(context.TODO(), query).Decode(&result)
@@ -101,7 +103,7 @@ func GetCharList(ctx iris.Context) {
 			// log.Println(AdminDB.servers)
 
 		}
-
+		ctx.ViewData("message", session.GetFlashString("msg"))
 		if err := ctx.View("users/charList.html"); err != nil {
 			ctx.Application().Logger().Infof(err.Error())
 		}
@@ -110,7 +112,13 @@ func GetCharList(ctx iris.Context) {
 
 //GetNewChar 新增角色介面
 func GetNewChar(ctx iris.Context) {
-	if err := ctx.View("users/newChar.html"); err != nil {
+	ctx.ViewData("template", map[string]string{
+		"banner": "新增",
+		"method": "POST",
+		"action": "/user/newchar",
+		"button": "新增",
+	})
+	if err := ctx.View("users/CharForm.html"); err != nil {
 		ctx.Application().Logger().Infof(err.Error())
 	}
 }
@@ -162,3 +170,75 @@ func PostNewChar(ctx iris.Context) {
 func GetChar(ctx iris.Context) {
 	ctx.Writef(ctx.Path())
 }
+
+//GetEditChar 編輯角色基本資料
+func GetEditChar(ctx iris.Context) {
+	session := sessions.Get(ctx)
+	var result bson.M
+
+	coll := DBSource.db.Collection("characters")
+
+	var query bson.M
+	// log.Println(ctx.Path())
+	if strings.HasPrefix(ctx.Path(), "/char/u/") {
+		id, _ := primitive.ObjectIDFromHex(ctx.Params().Get("uid"))
+		query = bson.M{
+			"uid": session.Get("_id"),
+			"_id": id, //未編入角色(24碼)
+		}
+		ctx.ViewData("template", map[string]string{
+			"banner": "編輯",
+			"method": "PUT",
+			"action": "/char/u/" + ctx.Params().Get("uid"),
+			"button": "更新",
+		})
+	} else {
+		charid, _ := strconv.ParseInt(ctx.Params().Get("uid"), 10, 0)
+		query = bson.M{
+			"uid":         session.Get("_id"),
+			"characterId": int32(charid),
+		}
+		ctx.ViewData("template", map[string]string{
+			"banner": "編輯",
+			"method": "PUT",
+			"action": "/char/" + ctx.Params().Get("uid"),
+			"button": "更新",
+		})
+	}
+	// log.Println(query)
+	err := coll.FindOne(context.TODO(), query).Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			session.SetFlash("msg", "命令無法操作，請確認資料是否存在 err:"+err.Error())
+		} else {
+			//log.Fatal(err)
+			session.SetFlash("msg", "發生錯誤err: "+err.Error())
+		}
+		ctx.Redirect("/user/char")
+	} else {
+		ctx.ViewData("charData", result)
+		if err := ctx.View("users/CharForm.html"); err != nil {
+			ctx.Application().Logger().Infof(err.Error())
+		}
+	}
+}
+
+//PutCharUpdate 更新資料庫角色
+func PutCharUpdate(ctx iris.Context) {
+
+}
+
+// //編輯已編入資料庫角色大頭照
+// func GetCharUpload(ctx iris.Context) {
+
+// }
+
+//PostCharUpload 上傳角色大頭照
+func PostCharUpload(ctx iris.Context) {
+
+}
+
+// //編輯未編入資料庫角色大頭照
+// func GetCharUpload(ctx iris.Context) {
+
+// }

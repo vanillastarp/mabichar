@@ -12,8 +12,10 @@ import (
 	"github.com/kataras/iris/v12/middleware/methodoverride"
 	"github.com/kataras/iris/v12/middleware/recover"
 	"github.com/kataras/iris/v12/sessions"
+	"golang.org/x/crypto/bcrypt"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -158,8 +160,16 @@ func main() {
 	app.PartyFunc("/char", func(user iris.Party) {
 		user.Use(authentication)
 
-		user.Get("/{uid: int}", GetChar)                               //已編入資料庫角色
-		user.Get("/u/{uid: string regexp([0-9a-f]) max(24)}", GetChar) //未編入資料庫角色
+		user.Get("/{uid: int}", GetChar)                                        //瀏覽已編入資料庫角色
+		user.Get("/u/{uid: string regexp([0-9a-f]) max(24)}", GetChar)          //瀏覽未編入資料庫角色
+		user.Get("/{uid: int}/edit", GetEditChar)                               //編輯已編入資料庫角色基本資料
+		user.Get("/u/{uid: string regexp([0-9a-f]) max(24)}/edit", GetEditChar) //編輯未編入資料庫角色基本資料
+		user.Put("/{uid: int}", PutCharUpdate)                                  //更新已編入資料庫角色
+		user.Put("/u/{uid: string regexp([0-9a-f]) max(24)}", PutCharUpdate)    //更新未編入資料庫角色
+		// user.Get("/{uid: int}/upload", GetCharUpload)                                 //編輯已編入資料庫角色大頭照
+		user.Post("/{uid: int}/upload", PostCharUpload) //上傳已編入資料庫角色大頭照
+		// user.Get("/u/{uid: string regexp([0-9a-f]) max(24)}/upload", GetCharUpload)   //編輯未編入資料庫角色大頭照
+		user.Post("/u/{uid: string regexp([0-9a-f]) max(24)}/upload", PostCharUpload) //上傳未編入資料庫角色大頭照
 	})
 	app.PartyFunc("/admin", func(user iris.Party) {
 		user.Use(authentication)
@@ -195,16 +205,80 @@ func main() {
 			ctx.View("index.html")
 		})
 		guest.Get("/register", func(ctx iris.Context) {
-			ctx.View("register.html")
+			session := sessions.Get(ctx)
+			ctx.ViewData("message", session.GetFlashString("msg"))
+			if err := ctx.View("register.html"); err != nil {
+				ctx.Application().Logger().Infof(err.Error())
+			}
 		})
 		guest.Post("/register", func(ctx iris.Context) {
-			ctx.Writef("in dev")
+			session := sessions.Get(ctx)
+			/*
+			   inputUsername
+			   inputEmail
+			   inputPassword
+			*/
+			username := ctx.PostValue("inputUsername")
+			email := ctx.PostValue("inputEmail")
+			password := ctx.PostValue("inputPassword")
+
+			if len(username) < 4 {
+				session.SetFlash("msg", "帳號長度不足，請重新輸入")
+				ctx.Redirect("/register")
+				return
+			}
+			if len(email) < 10 {
+				session.SetFlash("msg", "Email長度不足，請重新輸入")
+				ctx.Redirect("/register")
+				return
+			}
+			if len(password) < 8 {
+				session.SetFlash("msg", "密碼長度不足，請重新輸入")
+				ctx.Redirect("/register")
+				return
+			}
+			coll := DBSource.db.Collection("users")
+
+			hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
+			if err != nil {
+				//fmt.Println(err)
+				session.SetFlash("msg", "Password hash err: "+err.Error())
+			} else {
+				insertData := bson.M{
+					"username":         username,     //Username
+					"password":         string(hash), //hash
+					"enabled":          true,         //有效帳號
+					"role":             2,            //帳號角色
+					"create_timestamp": primitive.Timestamp{T: uint32(time.Now().Unix())},
+					"modify_timestamp": primitive.Timestamp{T: uint32(time.Now().Unix())},
+				}
+
+				//err := coll.FindOne(context.TODO(), filter).Decode(&result)
+				insertResult, err := coll.InsertOne(context.TODO(), insertData)
+				if err != nil {
+					//log.Fatal(err)
+					session.SetFlash("msg", "發生錯誤：可能原因為重複帳號.")
+					ctx.Redirect("/register")
+					return
+				} else {
+					log.Println("Added a new server with objectID: ", insertResult.InsertedID)
+					session.SetFlash("msg", "已成功建立帳號")
+				}
+			}
+			ctx.Redirect("/user")
 		})
 		guest.Get("/login", func(ctx iris.Context) {
 			session := sessions.Get(ctx)
 			if auth, _ := session.GetBoolean("authenticated"); auth {
-				ctx.Redirect("/user")
+				// ctx.Redirect("/user")
+				if session.Get("role") == "Admin" {
+					ctx.Redirect("/admin")
+				} else {
+					ctx.Redirect("/user")
+				}
 			} else {
+				ctx.ViewData("message", session.GetFlashString("msg"))
 				ctx.View("login.html")
 			}
 		})
@@ -283,11 +357,13 @@ func main() {
 
 			if err != nil {
 				if err == mongo.ErrNoDocuments {
-					ctx.ViewData("message", "無法登入，請確認您的帳號密碼是否正確")
-					ctx.View("login.html")
-					return
+					session.SetFlash("msg", "無法登入，請確認您的帳號密碼是否正確")
+					// ctx.ViewData("message", )
+				} else {
+					session.SetFlash("msg", "無法登入，原因:"+err.Error())
 				}
-				log.Fatal(err)
+				// log.Fatal(err)
+				ctx.Redirect("/login")
 			} else {
 				session.Set("authenticated", true)
 				session.Set("username", result["username"])
