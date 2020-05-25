@@ -1,5 +1,5 @@
 {{ define "users/CharForm-head" }}
-
+    <link href="/static/css/char.css" rel="stylesheet">
 {{ end }}
 
 
@@ -8,74 +8,108 @@
     <h1 class="mt-4">{{ .template.banner }}角色</h1>
     <hr>
     <div class="jumbotron">
-        <form name="EditForm" method="POST" action="{{ .template.action }}">
-            <input type="hidden" name="_id" id="_id" value="{{ .charData._id.Hex }}"/>
-            <input type="hidden" name="_method" value='{{ .template.method }}'>
+        <div class="text-center">{{ .message }}</div>
         <div class="row">
-            <div class="col-md-6 offset-md-3">
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputCharname">角色名稱</span>
+            <div class="col-md-6{{ if .charData }}{{else}} offset-md-3{{ end }}">
+                <form name="EditForm" method="POST" action="{{ .template.action }}">
+                    <input type="hidden" name="_id" id="_id" value="{{ .charData._id.Hex }}" />
+                    <input type="hidden" name="_method" value='{{ .template.method }}'>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputCharname">角色名稱</span>
+                        </div>
+                        <input type="text" name="inputCharname" id="inputCharname" value="{{ .charData.name }}"
+                            class="form-control" placeholder="輸入角色名稱" aria-label="角色名稱" aria-describedby="inputCharname"
+                            required>
                     </div>
-                    <input type="text" name="inputCharname" id="inputCharname" value="{{ .charData.name }}" class="form-control" placeholder="輸入角色名稱" aria-label="角色名稱" aria-describedby="inputCharname" required>
-                </div>
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputBirthday">角色建立日期</span>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputBirthday">角色建立日期</span>
+                        </div>
+                        <input type="date" name="inputBirthday" id="inputBirthday" value="{{ .charData.birthday }}"
+                            class="form-control" placeholder="輸入選擇日期" aria-label="角色建立日期"
+                            aria-describedby="inputBirthday" required>
                     </div>
-                    <input type="date" name="inputBirthday" id="inputBirthday" value="{{ .charData.birthday }}" class="form-control" placeholder="輸入選擇日期" aria-label="角色建立日期" aria-describedby="inputBirthday" required>
-                </div>
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="inputWeekborn">角色生日</label>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="inputWeekborn">角色生日</label>
+                        </div>
+                        <select class="custom-select" name="inputWeekborn" id="inputWeekborn">
+                            <option value="0">請選擇</option>
+                            <option value="7" {{ if .charData }}{{ if eq .charData.weekborn 7 }}
+                                selected{{ end }}{{ end }}>立春(Imbolic) 星期日</option>
+                            <option value="1" {{ if .charData }}{{ if eq .charData.weekborn 1 }}
+                                selected{{ end }}{{ end }}>春分(Alban Eiler) 星期一</option>
+                            <option value="2" {{ if .charData }}{{ if eq .charData.weekborn 2 }}
+                                selected{{ end }}{{ end }}>入夏(Beltane) 星期二</option>
+                            <option value="3" {{ if .charData }}{{ if eq .charData.weekborn 3 }}
+                                selected{{ end }}{{ end }}>立夏(Alban Heruin) 星期三</option>
+                            <option value="4" {{ if .charData }}{{ if eq .charData.weekborn 4 }}
+                                selected{{ end }}{{ end }}>秋收(Lughnasadh) 星期四</option>
+                            <option value="5" {{ if .charData }}{{ if eq .charData.weekborn 5 }}
+                                selected{{ end }}{{ end }}>秋收節(Alban Elved) 星期五</option>
+                            <option value="6" {{ if .charData }}{{ if eq .charData.weekborn 6 }}
+                                selected{{ end }}{{ end }}>山夏(Samhain) 星期六</option>
+                        </select>
                     </div>
-                    <select class="custom-select" name="inputWeekborn" id="inputWeekborn">
-                        <option selected>請選擇</option>
-                        <option value="7">立春(Imbolic) 星期日</option>
-                        <option value="1">春分(Alban Eiler) 星期一</option>
-                        <option value="2">入夏(Beltane) 星期二</option>
-                        <option value="3">立夏(Alban Heruin) 星期三</option>
-                        <option value="4">秋收(Lughnasadh) 星期四</option>
-                        <option value="5">秋收節(Alban Elved) 星期五</option>
-                        <option value="6">山夏(Samhain) 星期六</option>
-                    </select>
-                </div>
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="inputRace">角色種族</label>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="inputRace">角色種族</label>
+                        </div>
+                        <select class="custom-select" name="inputRace" id="inputRace">
+                            <option value="0">請選擇</option>
+                            <option value="1" {{ if .charData }}{{ if eq .charData.race 1 }} selected{{ end }}{{ end }}>
+                                人類</option>
+                            <option value="2" {{ if .charData }}{{ if eq .charData.race 2 }} selected{{ end }}{{ end }}>
+                                精靈</option>
+                            <option value="3" {{ if .charData }}{{ if eq .charData.race 3 }} selected{{ end }}{{ end }}>
+                                巨人</option>
+                            <option value="4" disabled>X寵物</option>
+                            <option value="5" disabled>X夥伴</option>
+                        </select>
                     </div>
-                    <select class="custom-select" name="inputRace" id="inputRace">
-                        <option selected>請選擇</option>
-                        <option value="1">人類</option>
-                        <option value="2">精靈</option>
-                        <option value="3">巨人</option>
-                        <option value="4" disabled>X寵物</option>
-                        <option value="5" disabled>X夥伴</option>
-                    </select>
-                </div>
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="inputServer">伺服器</label>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="inputServer">伺服器</label>
+                        </div>
+                        <select class="custom-select" name="inputServer" id="inputServer">
+                            <option>請選擇</option>
+                            <option value="1" {{ if .charData }}{{ if eq .charData.server 1 }}
+                                selected{{ end }}{{ end }}>貝婷伺服器</option>
+                            <option value="2" {{ if .charData }}{{ if eq .charData.server 2 }}
+                                selected{{ end }}{{ end }}>愛麗沙伺服器</option>
+                            <option value="3" {{ if .charData }}{{ if eq .charData.server 3 }}
+                                selected{{ end }}{{ end }}>安黛莉伺服器(~2020/4/23)</option>
+                            <option value="4" {{ if .charData }}{{ if eq .charData.server 4 }}
+                                selected{{ end }}{{ end }}>凱琳伺服器(~2020/4/23)</option>
+                            <option value="5" {{ if .charData }}{{ if eq .charData.server 5 }}
+                                selected{{ end }}{{ end }}>迪恩伺服器(~2020/4/23)</option>
+                            <option value="6" {{ if .charData }}{{ if eq .charData.server 6 }}
+                                selected{{ end }}{{ end }}>娜歐伺服器</option>
+                        </select>
                     </div>
-                    <select class="custom-select" name="inputServer" id="inputServer">
-                        <option selected>請選擇</option>
-                        <option value="1">貝婷伺服器</option>
-                        <option value="2">愛麗沙伺服器</option>
-                        <option value="3">安黛莉伺服器(~2020/4/23)</option>
-                        <option value="4">凱琳伺服器(~2020/4/23)</option>
-                        <option value="5">迪恩伺服器(~2020/4/23)</option>
-                        <option value="6">娜歐伺服器</option>
-                    </select>
-                </div>
-                <div class="input-group mb-3">
-                    <a href="/user/char" class="btn btn-info active" role="button" aria-pressed="true">回角色列表</a>
-                    <div class="col text-center">
-                        <button class="btn btn-primary" type="submit">{{ .template.button }}</button>
+                    <div class="input-group mb-3">
+                        <a href="/user/char" class="btn btn-info active" role="button" aria-pressed="true">回角色列表</a>
+                        <div class="col text-center">
+                            <button class="btn btn-primary" type="submit">{{ .template.button }}</button>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
+            {{ if .charData }}
+            <div class="col-md-6">
+                <form action="{{ .template.action }}/upload" method="POST" enctype="multipart/form-data">
+                    <div class="card front card-custom"
+                        style="height: 300px;width: 300px;display: block;margin-left: auto;margin-right: auto;{{ if .charData.imageUrl }}background-image: url('/static/avatar/{{.charData._id.Hex}}.png');{{ end }}"></div>
+                    <div class="text-center">
+                        <input type="hidden" name="_id" id="_id" value="{{ .charData._id.Hex }}" />
+                        <input type="file" name="inputImage" id="inputImage" required>
+                        <button class="btn btn-primary" type="submit">上傳頭像</button>
+                    </div>
+                </form>
+            </div>
+            {{ end }}
         </div>
-    </form>
     </div>
 </div>
 {{ end }}

@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"io"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -135,17 +137,17 @@ func PostNewChar(ctx iris.Context) {
 	   inputRace
 	   inputServer
 	*/
-	inputWeekborn, _ := strconv.ParseInt(ctx.PostValue("inputWeekborn"), 10, 0)
-	inputRace, _ := strconv.ParseInt(ctx.PostValue("inputRace"), 10, 0)
-	inputServer, _ := strconv.ParseInt(ctx.PostValue("inputServer"), 10, 0)
+	inputWeekborn, _ := strconv.ParseInt(ctx.PostValue("inputWeekborn"), 10, 32)
+	inputRace, _ := strconv.ParseInt(ctx.PostValue("inputRace"), 10, 32)
+	inputServer, _ := strconv.ParseInt(ctx.PostValue("inputServer"), 10, 32)
 	insertData := bson.M{
 		"uid":              session.Get("_id"),
 		"characterId":      0,
 		"name":             ctx.PostValue("inputCharname"),
 		"birthday":         ctx.PostValue("inputBirthday"),
-		"weekborn":         int32(inputWeekborn),
-		"race":             int32(inputRace),
-		"server":           int32(inputServer),
+		"weekborn":         inputWeekborn,
+		"race":             inputRace,
+		"server":           inputServer,
 		"imageUrl":         "",
 		"enabled":          true,
 		"shared":           false,
@@ -174,11 +176,10 @@ func GetChar(ctx iris.Context) {
 //GetEditChar 編輯角色基本資料
 func GetEditChar(ctx iris.Context) {
 	session := sessions.Get(ctx)
-	var result bson.M
 
 	coll := DBSource.db.Collection("characters")
 
-	var query bson.M
+	var result, query bson.M
 	// log.Println(ctx.Path())
 	if strings.HasPrefix(ctx.Path(), "/char/u/") {
 		id, _ := primitive.ObjectIDFromHex(ctx.Params().Get("uid"))
@@ -193,10 +194,10 @@ func GetEditChar(ctx iris.Context) {
 			"button": "更新",
 		})
 	} else {
-		charid, _ := strconv.ParseInt(ctx.Params().Get("uid"), 10, 0)
+		charid, _ := strconv.ParseInt(ctx.Params().Get("uid"), 10, 32)
 		query = bson.M{
 			"uid":         session.Get("_id"),
-			"characterId": int32(charid),
+			"characterId": charid,
 		}
 		ctx.ViewData("template", map[string]string{
 			"banner": "編輯",
@@ -217,6 +218,7 @@ func GetEditChar(ctx iris.Context) {
 		ctx.Redirect("/user/char")
 	} else {
 		ctx.ViewData("charData", result)
+		ctx.ViewData("message", session.GetFlashString("msg")) //Show some message with error
 		if err := ctx.View("users/CharForm.html"); err != nil {
 			ctx.Application().Logger().Infof(err.Error())
 		}
@@ -225,20 +227,128 @@ func GetEditChar(ctx iris.Context) {
 
 //PutCharUpdate 更新資料庫角色
 func PutCharUpdate(ctx iris.Context) {
+	session := sessions.Get(ctx)
 
+	coll := DBSource.db.Collection("characters")
+	/*
+	   inputCharname
+	   inputBirthday
+	   inputWeekborn
+	   inputRace
+	   inputServer
+	*/
+	var filter bson.M
+	inputWeekborn, _ := strconv.ParseInt(ctx.PostValue("inputWeekborn"), 10, 32)
+	inputRace, _ := strconv.ParseInt(ctx.PostValue("inputRace"), 10, 32)
+	inputServer, _ := strconv.ParseInt(ctx.PostValue("inputServer"), 10, 32)
+
+	if inputWeekborn == 0 {
+		session.SetFlash("msg", "錯誤：請選擇角色生日")
+		ctx.Redirect(ctx.Path() + "/edit")
+		return
+	}
+	if inputRace == 0 {
+		session.SetFlash("msg", "錯誤：請選擇種族")
+		ctx.Redirect(ctx.Path() + "/edit")
+		return
+	}
+	if inputServer == 0 {
+		session.SetFlash("msg", "錯誤：請選擇伺服器")
+		ctx.Redirect(ctx.Path() + "/edit")
+		return
+	}
+
+	updateData := bson.M{
+		"$set": bson.M{
+			"name":     ctx.PostValue("inputCharname"),
+			"birthday": ctx.PostValue("inputBirthday"),
+			"weekborn": inputWeekborn,
+			"race":     inputRace,
+			"server":   inputServer,
+		}}
+	if strings.HasPrefix(ctx.Path(), "/char/u/") {
+		id, _ := primitive.ObjectIDFromHex(ctx.Params().Get("uid"))
+		filter = bson.M{
+			"uid": session.Get("_id"),
+			"_id": id, //未編入角色(24碼)
+		}
+	} else {
+		charid, _ := strconv.ParseInt(ctx.Params().Get("uid"), 10, 32)
+		filter = bson.M{
+			"uid":         session.Get("_id"),
+			"characterId": charid,
+		}
+	}
+
+	result, err := coll.UpdateOne(context.TODO(), filter, updateData)
+	if err != nil {
+		//log.Fatal(err)
+		session.SetFlash("msg", "發生錯誤，不知明原因.")
+	} else {
+		if result.ModifiedCount == 1 {
+			session.SetFlash("msg", "更新成功")
+		} else {
+			session.SetFlash("msg", "更新異常，您可能未異動資料")
+		}
+	}
+	ctx.Redirect("/user/char")
 }
-
-// //編輯已編入資料庫角色大頭照
-// func GetCharUpload(ctx iris.Context) {
-
-// }
 
 //PostCharUpload 上傳角色大頭照
 func PostCharUpload(ctx iris.Context) {
+	session := sessions.Get(ctx)
+	coll := DBSource.db.Collection("characters")
+	ctx.SetMaxRequestBodySize(512)
+	/*
+		inputImage
+	*/
 
+	file, _, err := ctx.FormFile("inputImage")
+	if err != nil {
+		ctx.StatusCode(iris.StatusInternalServerError)
+		ctx.HTML("Error while uploading: <b>" + err.Error() + "</b>")
+		return
+	}
+	defer file.Close()
+	fname := ctx.PostValue("_id") + ".png"
+
+	out, err := os.OpenFile("./public/avatar/"+fname, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		ctx.StatusCode(iris.StatusInternalServerError)
+		ctx.HTML("Error while uploading: <b>" + err.Error() + "</b>")
+		return
+	}
+	defer out.Close()
+	io.Copy(out, file)
+
+	var filter bson.M
+	updateData := bson.M{
+		"$set": bson.M{
+			"imageUrl": fname,
+		}}
+	if strings.HasPrefix(ctx.Path(), "/char/u/") {
+		id, _ := primitive.ObjectIDFromHex(ctx.Params().Get("uid"))
+		filter = bson.M{
+			"uid": session.Get("_id"),
+			"_id": id, //未編入角色(24碼)
+		}
+	} else {
+		charid, _ := strconv.ParseInt(ctx.Params().Get("uid"), 10, 32)
+		filter = bson.M{
+			"uid":         session.Get("_id"),
+			"characterId": charid,
+		}
+	}
+	result, err := coll.UpdateOne(context.TODO(), filter, updateData)
+	if err != nil {
+		//log.Fatal(err)
+		session.SetFlash("msg", "發生錯誤，不知明原因.")
+	} else {
+		if result.ModifiedCount == 1 {
+			session.SetFlash("msg", "更新成功")
+		} else {
+			session.SetFlash("msg", "更新異常，您可能未異動資料")
+		}
+	}
+	ctx.Redirect("/user/char")
 }
-
-// //編輯未編入資料庫角色大頭照
-// func GetCharUpload(ctx iris.Context) {
-
-// }

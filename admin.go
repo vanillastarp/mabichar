@@ -129,9 +129,9 @@ func PostServerCreate(ctx iris.Context) {
 	   inputServername
 	   inputServerEngname
 	*/
-	inputServerid, _ := strconv.ParseInt(ctx.PostValue("inputServerid"), 10, 0)
+	inputServerid, _ := strconv.ParseInt(ctx.PostValue("inputServerid"), 10, 32)
 	insertData := bson.M{
-		"serverid":      int32(inputServerid),
+		"serverid":      inputServerid,
 		"serverName":    ctx.PostValue("inputServername"),
 		"serverEngName": ctx.PostValue("inputServerEngname"),
 	}
@@ -154,9 +154,9 @@ func GetServerEdit(ctx iris.Context) {
 	var result bson.M
 	coll := DBSource.db.Collection("admin_Servers")
 
-	inputServerid, _ := strconv.ParseInt(ctx.Params().Get("serverid"), 10, 0)
+	inputServerid, _ := strconv.ParseInt(ctx.Params().Get("serverid"), 10, 32)
 	filter := bson.M{
-		"serverid": int32(inputServerid),
+		"serverid": inputServerid,
 	}
 	//log.Println("serverid: ", ctx.Params().Get("serverid"))
 
@@ -199,11 +199,11 @@ func PutServerUpdate(ctx iris.Context) {
 		   inputServername
 		   inputServerEngname
 		*/
-		inputServerid, _ := strconv.ParseInt(ctx.PostValue("inputServerid"), 10, 0)
+		inputServerid, _ := strconv.ParseInt(ctx.PostValue("inputServerid"), 10, 32)
 		filter := bson.M{"_id": id}
 		updateData := bson.M{
 			"$set": bson.M{
-				"serverid":      int32(inputServerid),
+				"serverid":      inputServerid,
 				"serverName":    ctx.PostValue("inputServername"),
 				"serverEngName": ctx.PostValue("inputServerEngname"),
 			}}

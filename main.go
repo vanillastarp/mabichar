@@ -160,15 +160,13 @@ func main() {
 	app.PartyFunc("/char", func(user iris.Party) {
 		user.Use(authentication)
 
-		user.Get("/{uid: int}", GetChar)                                        //瀏覽已編入資料庫角色
-		user.Get("/u/{uid: string regexp([0-9a-f]) max(24)}", GetChar)          //瀏覽未編入資料庫角色
-		user.Get("/{uid: int}/edit", GetEditChar)                               //編輯已編入資料庫角色基本資料
-		user.Get("/u/{uid: string regexp([0-9a-f]) max(24)}/edit", GetEditChar) //編輯未編入資料庫角色基本資料
-		user.Put("/{uid: int}", PutCharUpdate)                                  //更新已編入資料庫角色
-		user.Put("/u/{uid: string regexp([0-9a-f]) max(24)}", PutCharUpdate)    //更新未編入資料庫角色
-		// user.Get("/{uid: int}/upload", GetCharUpload)                                 //編輯已編入資料庫角色大頭照
-		user.Post("/{uid: int}/upload", PostCharUpload) //上傳已編入資料庫角色大頭照
-		// user.Get("/u/{uid: string regexp([0-9a-f]) max(24)}/upload", GetCharUpload)   //編輯未編入資料庫角色大頭照
+		user.Get("/{uid: int}", GetChar)                                              //瀏覽已編入資料庫角色
+		user.Get("/u/{uid: string regexp([0-9a-f]) max(24)}", GetChar)                //瀏覽未編入資料庫角色
+		user.Get("/{uid: int}/edit", GetEditChar)                                     //編輯已編入資料庫角色基本資料
+		user.Get("/u/{uid: string regexp([0-9a-f]) max(24)}/edit", GetEditChar)       //編輯未編入資料庫角色基本資料
+		user.Put("/{uid: int}", PutCharUpdate)                                        //更新已編入資料庫角色
+		user.Put("/u/{uid: string regexp([0-9a-f]) max(24)}", PutCharUpdate)          //更新未編入資料庫角色
+		user.Post("/{uid: int}/upload", PostCharUpload)                               //上傳已編入資料庫角色大頭照
 		user.Post("/u/{uid: string regexp([0-9a-f]) max(24)}/upload", PostCharUpload) //上傳未編入資料庫角色大頭照
 	})
 	app.PartyFunc("/admin", func(user iris.Party) {
