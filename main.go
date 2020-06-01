@@ -40,14 +40,6 @@ var DBSource = DBStruct{}
 //AdminDB 資料庫固定型資料
 var AdminDB = AdminDBStruct{}
 
-//SessionStruct Session結構表
-type SessionStruct struct {
-	authenticated bool
-	username      string `bson:"username"`
-	_id           int32  `bson:"_id"`
-	role          string `bson:"rolename"`
-}
-
 //connDB 連接資料庫
 func connDB(DBSource *DBStruct, AdminDB *AdminDBStruct) {
 	var envFileName = ".env"
@@ -83,10 +75,6 @@ func connDB(DBSource *DBStruct, AdminDB *AdminDBStruct) {
 	DBSource.db = client.Database(os.Getenv("database"))
 
 	//Take admin_Servers List
-	// type Servers struct {
-	// 	serverName string
-	// 	serverid   int
-	// }
 	coll := DBSource.db.Collection("admin_Servers")
 	cur, err := coll.Find(context.Background(), bson.M{})
 	defer cur.Close(context.Background())
@@ -283,22 +271,8 @@ func main() {
 		guest.Post("/login", func(ctx iris.Context) {
 			session := sessions.Get(ctx)
 
-			// type User struct {
-			// 	_id             primitive.ObjectID `bson:"_id"`
-			// 	username        string             `bson:"username"`
-			// 	password        string             `bson:"password"`
-			// 	enabled         bool               `bson:"enabled"`
-			// 	createTimestamp int                `bson:"create_timestamp"`
-			// 	modifyTimestamp int                `bson:"modify_timestamp"`
-			// }
-
 			var result bson.M
 
-			// coll := DBSource.client.Database(DBSource.DBName).Collection("users")
-			// filter := bson.M{"username": "root"}
-			// cur, err := coll.Find(context.TODO(), filter, findOptions) //.Decode(&result)
-
-			//coll := DBSource.client.Database(DBSource.DBName).Collection("users_role")
 			coll := DBSource.db.Collection("users_role")
 
 			//dbctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
@@ -313,46 +287,6 @@ func main() {
 			err := coll.FindOne(context.TODO(), filter).Decode(&result)
 			// log.Println("result data: ", result)
 
-			// matchStage := bson.D{{"$match", bson.M{
-			// 	"username": ctx.PostValue("username"),
-			// 	"password": "",
-			// 	"enabled":  true}}}
-
-			// lookupStage := bson.D{{"$lookup", bson.M{
-			// 	"from":         "roles",
-			// 	"localField":   "role",
-			// 	"foreignField": "roleid",
-			// 	"as":           "roles"}}}
-
-			// unwindStage := bson.D{{"$unwind", bson.M{
-			// 	"path": "$roles"}}}
-			// addFieldStage := bson.D{{"$addFields", bson.M{
-			// 	"rolename": "$roles.rolename"}}}
-
-			// pip := mongo.Pipeline{matchStage, lookupStage, unwindStage, addFieldStage}
-			// cur, err := coll.Aggregate(context.Background(), pip)
-
-			// defer cur.Close(context.Background())
-			// var results []bson.M
-			// if err := cur.All(context.Background(), &results); err != nil {
-			// 	log.Fatal(err)
-			// }
-			// log.Println("result data: ", result)
-
-			// log.Println("cursorID: ", cur.ID())
-			// if !cur.TryNext(context.Background()) {
-			// 	ctx.ViewData("message", "無法登入，請確認您的帳號密碼是否正確!")
-			// 	ctx.View("login.html")
-			// 	return
-			// } else {
-
-			// 	log.Println(cur.Decode(&result))
-			// 	log.Println("cursorID2: ", cur.ID())
-			// 	// for cur.Next(context.Background()) {
-			// 	// 	cur.Decode(&result)
-			// 	// }
-			// }
-
 			if err != nil {
 				if err == mongo.ErrNoDocuments {
 					session.SetFlash("msg", "無法登入，請確認您的帳號密碼是否正確")
@@ -366,22 +300,13 @@ func main() {
 				session.Set("authenticated", true)
 				session.Set("username", result["username"])
 				session.Set("_id", result["_id"])
-				// log.Println("_id::::::", result["_id"])
-				// _id, _ := session.GetInt("_id")
-				// log.Println("session._id::::", _id)
 				session.Set("role", result["rolename"])
+
 				if result["rolename"] == "Admin" {
 					ctx.Redirect("/admin")
 				} else {
 					ctx.Redirect("/user")
 				}
-				// if result["role"] == int32(1) {
-				// 	session.Set("role", "Admin")
-				// 	ctx.Redirect("/admin")
-				// } else {
-				// 	session.Set("role", "User")
-				// 	ctx.Redirect("/user")
-				// }
 			}
 		})
 
@@ -389,11 +314,7 @@ func main() {
 		guest.Get("/logout", func(ctx iris.Context) {
 			session := sessions.Get(ctx)
 			if auth, _ := session.GetBoolean("authenticated"); auth {
-				//session.Set("authenticated", false)
 				session.Clear()
-				// session.Delete("authenticated")
-				// session.Delete("username")
-				// session.Delete("role")
 			}
 			ctx.Redirect("/")
 		})
@@ -454,9 +375,6 @@ func authenticatedGuest(ctx iris.Context) {
 	if auth, _ := session.GetBoolean("authenticated"); auth {
 		ctx.ViewData("auth", strconv.FormatBool(auth))
 		ctx.ViewData("username", session.GetString("username"))
-		// ctx.ViewData("_id", session.Get("_id"))
-		// ctx.ViewData("role", session.GetString("role"))
-		//ctx.ViewData("role", session.Get("role"))
 	}
 	ctx.Next()
 }

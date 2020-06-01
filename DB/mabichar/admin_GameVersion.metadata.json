@@ -1,1 +1,1 @@
-{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"mabichar.admin_GameVersion"}],"uuid":"d5e91e0ab2964197b890427ad08a3dd2"}
+{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"mabichar.admin_GameVersion"}],"uuid":"2f0746a48cc54c4b965b9360c8d7275b"}
