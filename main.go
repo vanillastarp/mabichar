@@ -3,11 +3,9 @@ package main
 import (
 	"context"
 	"log"
-	"os"
 	"strconv"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/middleware/methodoverride"
 	"github.com/kataras/iris/v12/middleware/recover"
@@ -17,8 +15,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 //DBStruct 資料庫連線結構
@@ -40,71 +36,11 @@ var DBSource = DBStruct{}
 //AdminDB 資料庫固定型資料
 var AdminDB = AdminDBStruct{}
 
-//connDB 連接資料庫
-func connDB(DBSource *DBStruct, AdminDB *AdminDBStruct) {
-	var envFileName = ".env"
-
-	err := godotenv.Load(envFileName)
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-	//test Database
-	//ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	clientOpts := options.Client().ApplyURI(os.Getenv("DSN"))
-	client, err := mongo.Connect(context.TODO(), clientOpts)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	// defer func() {
-	// 	if err = client.Disconnect(context.TODO()); err != nil {
-	// 		log.Fatal(err)
-	// 	} else {
-	// 		log.Println("[test] End test MongoDB.")
-	// 	}
-	// }()
-	if err = client.Ping(context.TODO(), readpref.Primary()); err != nil {
-		log.Fatal(err)
-	} else {
-		log.Println("[test] MongoDB is running.")
-	}
-
-	DBSource.DSN = os.Getenv("DSN")
-	DBSource.DBName = os.Getenv("database")
-	DBSource.client = client
-	DBSource.db = client.Database(os.Getenv("database"))
-
-	//Take admin_Servers List
-	coll := DBSource.db.Collection("admin_Servers")
-	cur, err := coll.Find(context.Background(), bson.M{})
-	defer cur.Close(context.Background())
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		serverList := make(map[int]interface{})
-		var i = 1
-		for cur.Next(context.Background()) {
-			var tmp bson.M
-			if err = cur.Decode(&tmp); err != nil {
-				log.Fatal(err)
-			}
-			//log.Println(tmp)
-			// serverList[i] = tmp["serverName"].(string)
-			serverList[i] = bson.M{
-				"serverName":    tmp["serverName"].(string),
-				"serverEngName": tmp["serverEngName"].(string),
-			}
-			i++
-		}
-		AdminDB.servers = serverList
-
-	}
-
-}
-
 func main() {
 
-	connDB(&DBSource, &AdminDB)
+	APIConnectDB(&DBSource)
+	APIGetServerList(&DBSource, &AdminDB)
+
 	defer DBSource.client.Disconnect(context.TODO())
 
 	app := iris.New()
@@ -123,17 +59,16 @@ func main() {
 		methodoverride.SaveOriginalMethod("_originalMethod"),
 	)
 	app.WrapRouter(mo)
-
-	// Load all templates from the "./views" folder
-	// where extension is ".html" and parse them
-	// using the standard `html/template` package.
-	var t = iris.HTML("./views", ".html").Reload(true)
-	// t.AddFunc("serverList", func(i int) string {
-	// 	return AdminDB.servers[i].(string)
-	// })
-	app.RegisterView(t)
+	app.RegisterView(iris.HTML("./views", ".html").Reload(true))
 	app.Layout("shared/layout.html")
 	config := iris.WithConfiguration(iris.YAML("./configs/iris.yaml"))
+
+	app.PartyFunc("/api", func(api iris.Party) {
+		api.Use(authentication)
+		api.Get("/GetSkills", func(ctx iris.Context) { ctx.JSON(APIGetSkills()) })
+		api.Get("/GetServers", func(ctx iris.Context) { ctx.JSON(APIGetServers()) })
+
+	})
 
 	app.PartyFunc("/user", func(user iris.Party) {
 		user.Use(authentication)
@@ -271,12 +206,6 @@ func main() {
 		guest.Post("/login", func(ctx iris.Context) {
 			session := sessions.Get(ctx)
 
-			var result bson.M
-
-			coll := DBSource.db.Collection("users_role")
-
-			//dbctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
-
 			//原始簡單版
 			filter := bson.M{
 				"username": ctx.PostValue("username"),
@@ -284,17 +213,14 @@ func main() {
 				"enabled":  true,
 			}
 
-			err := coll.FindOne(context.TODO(), filter).Decode(&result)
-			// log.Println("result data: ", result)
+			result, err := APIQueryOneBase("users_role", filter)
 
 			if err != nil {
 				if err == mongo.ErrNoDocuments {
 					session.SetFlash("msg", "無法登入，請確認您的帳號密碼是否正確")
-					// ctx.ViewData("message", )
 				} else {
 					session.SetFlash("msg", "無法登入，原因:"+err.Error())
 				}
-				// log.Fatal(err)
 				ctx.Redirect("/login")
 			} else {
 				session.Set("authenticated", true)
@@ -352,11 +278,6 @@ func authentication(ctx iris.Context) {
 
 	ctx.ViewData("auth", strconv.FormatBool(auth))
 	ctx.ViewData("username", session.GetString("username"))
-	// ctx.ViewData("_id", session.Get("_id"))
-	// ctx.ViewData("role", session.GetString("role"))
-
-	// log.Println("role: ", session.Get("role"))
-	// log.Println("_id: ", session.Get("_id"))
 
 	ctx.Next()
 }
@@ -386,6 +307,5 @@ func RunningLog(ctx iris.Context) {
 }
 
 func notFound(ctx iris.Context) {
-	//ctx.ViewData("message", "Did you forget something?")
 	ctx.View("errors/404.html") //設定找不到頁面
 }

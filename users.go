@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/sessions"
@@ -19,31 +18,23 @@ import (
 
 //GetIndex 使用者的dashboard介面
 func GetIndex(ctx iris.Context) {
-	//session := sessions.Get(ctx)
+	session := sessions.Get(ctx)
 
-	var result []bson.M
-	coll := DBSource.db.Collection("characters")
-
-	query := bson.M{
+	filter := bson.M{
 		"uid": sessions.Get(ctx).Get("_id"),
 	}
 
-	cur, err := coll.Find(context.Background(), query)
-	defer cur.Close(context.Background())
+	result, err := APIQueryBase("characters", filter)
+
 	if err != nil {
-		log.Fatal(err)
-	} else {
-		if err = cur.All(context.Background(), &result); err != nil {
-			log.Fatal(err)
-		}
-
-		ctx.ViewData("charAmount", len(result))
-
-		if err := ctx.View("users/dashboard.html"); err != nil {
-			ctx.Application().Logger().Infof(err.Error())
-		}
+		session.SetFlash("msg", err)
 	}
 
+	ctx.ViewData("charAmount", len(result))
+
+	if err := ctx.View("users/dashboard.html"); err != nil {
+		ctx.Application().Logger().Infof(err.Error())
+	}
 }
 
 //GetEditUser 設定使用者的設定介面
@@ -62,29 +53,16 @@ func PostUpdateUser(ctx iris.Context) {
 func GetCharList(ctx iris.Context) {
 	session := sessions.Get(ctx)
 
-	var result []bson.M
-	coll := DBSource.db.Collection("characters")
-
-	query := bson.M{
+	filter := bson.M{
 		"uid": session.Get("_id"), //用使用者的_id去找characters collection的uid
 	}
 
-	// err := coll.FindOne(context.TODO(), query).Decode(&result)
-	cur, err := coll.Find(context.Background(), query)
-	defer cur.Close(context.Background())
-	if err != nil {
-		// if err == mongo.ErrNoDocuments {
-		// 	ctx.ViewData("message", "目前您未有任何角色，請開始新增角色")
-		// 	ctx.View("users/charList.html")
-		// 	return
-		// }
-		log.Fatal(err)
-	} else {
-		if err = cur.All(context.Background(), &result); err != nil {
-			log.Fatal(err)
-		}
-		//log.Println("result: ", result)
+	result, err := APIQueryBase("characters", filter)
 
+	if err != nil {
+		// log.Fatal(err)
+		session.SetFlash("msg", err)
+	} else {
 		if len(result) == 0 {
 			ctx.ViewData("message", "目前您未有任何角色，請開始新增角色")
 		} else {
@@ -100,15 +78,11 @@ func GetCharList(ctx iris.Context) {
 				6: "山夏(Samhain) 星期六"})
 
 			ctx.ViewData("serverList", AdminDB.servers)
-
-			// log.Println(map[int]string{1: "人類", 2: "精靈", 3: "巨人"})
-			// log.Println(AdminDB.servers)
-
 		}
-		ctx.ViewData("message", session.GetFlashString("msg"))
-		if err := ctx.View("users/charList.html"); err != nil {
-			ctx.Application().Logger().Infof(err.Error())
-		}
+	}
+	ctx.ViewData("message", session.GetFlashString("msg"))
+	if err := ctx.View("users/charList.html"); err != nil {
+		ctx.Application().Logger().Infof(err.Error())
 	}
 }
 
@@ -170,20 +144,37 @@ func PostNewChar(ctx iris.Context) {
 //1)/user/#### 此為已編入資料庫編號之角色(characterId)
 //2)/user/u/123456789012345678901234 此為尚未編入資料庫編號之角色
 func GetChar(ctx iris.Context) {
-	ctx.Writef(ctx.Path())
+	// session := sessions.Get(ctx)
+
+	// coll := DBSource.db.Collection("characters")
+
+	// var result, query bson.M
+	// if strings.HasPrefix(ctx.Path(), "/char/u/") {
+	// 	id, _ := primitive.ObjectIDFromHex(ctx.Params().Get("uid"))
+	// 	query = bson.M{
+	// 		"uid": session.Get("_id"),
+	// 		"_id": id, //未編入角色(24碼)
+	// 	}
+	// } else {
+	// 	charid, _ := strconv.ParseInt(ctx.Params().Get("uid"), 10, 32)
+	// 	query = bson.M{
+	// 		"uid":         session.Get("_id"),
+	// 		"characterId": charid,
+	// 	}
+	// }
+
+	ctx.View("users/Char.html")
+
 }
 
 //GetEditChar 編輯角色基本資料
 func GetEditChar(ctx iris.Context) {
 	session := sessions.Get(ctx)
 
-	coll := DBSource.db.Collection("characters")
-
-	var result, query bson.M
-	// log.Println(ctx.Path())
+	var filter bson.M
 	if strings.HasPrefix(ctx.Path(), "/char/u/") {
 		id, _ := primitive.ObjectIDFromHex(ctx.Params().Get("uid"))
-		query = bson.M{
+		filter = bson.M{
 			"uid": session.Get("_id"),
 			"_id": id, //未編入角色(24碼)
 		}
@@ -195,7 +186,7 @@ func GetEditChar(ctx iris.Context) {
 		})
 	} else {
 		charid, _ := strconv.ParseInt(ctx.Params().Get("uid"), 10, 32)
-		query = bson.M{
+		filter = bson.M{
 			"uid":         session.Get("_id"),
 			"characterId": charid,
 		}
@@ -206,15 +197,11 @@ func GetEditChar(ctx iris.Context) {
 			"button": "更新",
 		})
 	}
-	// log.Println(query)
-	err := coll.FindOne(context.TODO(), query).Decode(&result)
+
+	result, err := APIQueryOneBase("characters", filter)
+
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			session.SetFlash("msg", "命令無法操作，請確認資料是否存在 err:"+err.Error())
-		} else {
-			//log.Fatal(err)
-			session.SetFlash("msg", "發生錯誤err: "+err.Error())
-		}
+		session.SetFlash("msg", err)
 		ctx.Redirect("/user/char")
 	} else {
 		ctx.ViewData("charData", result)
@@ -229,7 +216,6 @@ func GetEditChar(ctx iris.Context) {
 func PutCharUpdate(ctx iris.Context) {
 	session := sessions.Get(ctx)
 
-	coll := DBSource.db.Collection("characters")
 	/*
 	   inputCharname
 	   inputBirthday
@@ -280,7 +266,8 @@ func PutCharUpdate(ctx iris.Context) {
 		}
 	}
 
-	result, err := coll.UpdateOne(context.TODO(), filter, updateData)
+	result, err := APIUpdateOneBase("characters", filter, updateData)
+
 	if err != nil {
 		//log.Fatal(err)
 		session.SetFlash("msg", "發生錯誤，不知明原因.")
@@ -347,7 +334,7 @@ func PostCharUpload(ctx iris.Context) {
 		if result.ModifiedCount == 1 {
 			session.SetFlash("msg", "更新成功")
 		} else {
-			session.SetFlash("msg", "更新異常，您可能未異動資料")
+			session.SetFlash("msg", "更新上傳")
 		}
 	}
 	ctx.Redirect("/user/char")

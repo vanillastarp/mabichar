@@ -32,22 +32,16 @@ func GetAchievements(ctx iris.Context) {
 
 //GetSkills 技能列表
 func GetSkills(ctx iris.Context) {
-	// session := sessions.Get(ctx)
 
-	var result []bson.M
-	coll := DBSource.db.Collection("admin_Skills")
-	cur, err := coll.Find(context.Background(), bson.M{})
-	defer cur.Close(context.Background())
+	result, err := APIQueryBase("admin_Skills", bson.M{})
+
 	if err != nil {
-		log.Fatal(err)
-	} else {
-		if err = cur.All(context.Background(), &result); err != nil {
-			log.Fatal(err)
-		}
-		ctx.ViewData("skillsList", result)
-		if err := ctx.View("admin/skillsList.html"); err != nil {
-			ctx.Application().Logger().Infof(err.Error())
-		}
+		ctx.ViewData("message", err.Error())
+	}
+
+	ctx.ViewData("skillsList", result)
+	if err := ctx.View("admin/skillsList.html"); err != nil {
+		ctx.Application().Logger().Infof(err.Error())
 	}
 }
 
@@ -85,21 +79,14 @@ func GetStories(ctx iris.Context) {
 func GetServers(ctx iris.Context) {
 	session := sessions.Get(ctx)
 
-	var result []bson.M
-	coll := DBSource.db.Collection("admin_Servers")
-	cur, err := coll.Find(context.Background(), bson.M{})
-	defer cur.Close(context.Background())
+	result, err := APIQueryBase("admin_Servers", bson.M{})
+
 	if err != nil {
 		//log.Fatal(err)
 		ctx.ViewData("message", err.Error())
-	} else {
-		if err = cur.All(context.Background(), &result); err != nil {
-			//log.Fatal(err)
-			ctx.ViewData("message", err.Error())
-		} else {
-			ctx.ViewData("message", session.GetFlashString("msg"))
-		}
 	}
+
+	ctx.ViewData("message", session.GetFlashString("msg"))
 	ctx.ViewData("serverList", result)
 	if err := ctx.View("admin/serverList.html"); err != nil {
 		ctx.Application().Logger().Infof(err.Error())
@@ -151,36 +138,34 @@ func PostServerCreate(ctx iris.Context) {
 
 //GetServerEdit 編輯伺服器表單
 func GetServerEdit(ctx iris.Context) {
-	var result bson.M
-	coll := DBSource.db.Collection("admin_Servers")
+	session := sessions.Get(ctx)
 
 	inputServerid, _ := strconv.ParseInt(ctx.Params().Get("serverid"), 10, 32)
 	filter := bson.M{
 		"serverid": inputServerid,
 	}
-	//log.Println("serverid: ", ctx.Params().Get("serverid"))
 
-	err := coll.FindOne(context.TODO(), filter).Decode(&result)
-	// log.Println(result)
+	result, err := APIQueryOneBase("admin_Servers", filter)
+
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			ctx.ViewData("message", "命令無法操作，請確認資料是否存在")
-			ctx.View("admin/serverEdit.html")
-			return
+			session.SetFlash("msg", "命令無法操作，請確認資料是否存在")
+		} else {
+			session.SetFlash("msg", "命令無法操作 err:"+err.Error())
 		}
-		log.Fatal(err)
-	} else {
-		ctx.ViewData("template", map[string]string{
-			"banner": "編輯",
-			"method": "PUT",
-			"action": "/admin/servers/",
-			"button": "更新",
-		})
-		ctx.ViewData("serverData", result)
-		// log.Println(result)
-		if err := ctx.View("admin/serverEdit.html"); err != nil {
-			ctx.Application().Logger().Infof(err.Error())
-		}
+		ctx.Redirect("/admin/servers")
+		return
+	}
+	ctx.ViewData("template", map[string]string{
+		"banner": "編輯",
+		"method": "PUT",
+		"action": "/admin/servers/",
+		"button": "更新",
+	})
+	ctx.ViewData("serverData", result)
+
+	if err := ctx.View("admin/serverEdit.html"); err != nil {
+		ctx.Application().Logger().Infof(err.Error())
 	}
 }
 
@@ -188,10 +173,8 @@ func GetServerEdit(ctx iris.Context) {
 func PutServerUpdate(ctx iris.Context) {
 	session := sessions.Get(ctx)
 
-	coll := DBSource.db.Collection("admin_Servers")
 	id, err := primitive.ObjectIDFromHex(ctx.PostValue("_id"))
 	if err != nil {
-		//log.Fatal("primitive.ObjectIDFromHex ERROR:", err)
 		session.SetFlash("msg", "primitive.ObjectIDFromHex ERROR: "+err.Error())
 	} else {
 		/*
@@ -207,9 +190,10 @@ func PutServerUpdate(ctx iris.Context) {
 				"serverName":    ctx.PostValue("inputServername"),
 				"serverEngName": ctx.PostValue("inputServerEngname"),
 			}}
-		result, err := coll.UpdateOne(context.TODO(), filter, updateData)
+
+		result, err := APIUpdateOneBase("admin_Servers", filter, updateData)
+
 		if err != nil {
-			//log.Fatal(err)
 			session.SetFlash("msg", "發生錯誤，可能原因為重複編號.")
 		} else {
 			if result.ModifiedCount == 1 {
