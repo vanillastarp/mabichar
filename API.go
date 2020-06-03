@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -56,6 +58,12 @@ func APIGetServerList(DBSource *DBStruct, AdminDB *AdminDBStruct) {
 	AdminDB.servers = serverList
 }
 
+/*
+//----------------------------------------------
+// 此區域為提供資料庫操作API
+//----------------------------------------------
+*/
+
 //APIQueryBase 提供多筆查詢基底
 func APIQueryBase(targetCollection string, filter bson.M) ([]bson.M, error) {
 	var result []bson.M
@@ -72,7 +80,7 @@ func APIQueryBase(targetCollection string, filter bson.M) ([]bson.M, error) {
 	return result, err
 }
 
-//APIUpdateBase 提供單筆更新基底
+//APIUpdateOneBase 提供單筆更新基底
 func APIUpdateOneBase(targetCollection string, filter bson.M, update bson.M) (*mongo.UpdateResult, error) {
 	coll := DBSource.db.Collection(targetCollection)
 	result, err := coll.UpdateOne(context.TODO(), filter, update)
@@ -93,6 +101,26 @@ func APIQueryOneBase(targetCollection string, filter bson.M) (bson.M, error) {
 	return result, err
 }
 
+//APIInsertOneBase 提供新增單筆資料
+func APIInsertOneBase(targetCollection string, insertData bson.M) (*mongo.InsertOneResult, error) {
+	coll := DBSource.db.Collection(targetCollection)
+	result, err := coll.InsertOne(context.TODO(), insertData)
+	return result, err
+}
+
+//APIDeleteOneBase 提供刪除單筆資料
+func APIDeleteOneBase(targetCollection string, deleteData bson.M) (*mongo.DeleteResult, error) {
+	coll := DBSource.db.Collection(targetCollection)
+	result, err := coll.DeleteOne(context.TODO(), deleteData)
+	return result, err
+}
+
+/*
+//----------------------------------------------
+// 此區域為提供資料API
+//----------------------------------------------
+*/
+
 //APIGetSkills 提供技能清單
 func APIGetSkills() []bson.M {
 	res, err := APIQueryBase("admin_Skills", bson.M{})
@@ -106,6 +134,16 @@ func APIGetSkills() []bson.M {
 //APIGetServers 提供伺服器清單
 func APIGetServers() []bson.M {
 	res, err := APIQueryBase("admin_Servers", bson.M{})
+	if err != nil {
+		log.Println(err.Error())
+		return []bson.M{}
+	}
+	return res
+}
+
+//APIGetCharacters 提供角色清單
+func APIGetCharacters(id primitive.ObjectID) []bson.M {
+	res, err := APIQueryBase("characters", bson.M{"uid": id})
 	if err != nil {
 		log.Println(err.Error())
 		return []bson.M{}

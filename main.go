@@ -67,7 +67,7 @@ func main() {
 		api.Use(authentication)
 		api.Get("/GetSkills", func(ctx iris.Context) { ctx.JSON(APIGetSkills()) })
 		api.Get("/GetServers", func(ctx iris.Context) { ctx.JSON(APIGetServers()) })
-
+		api.Get("/GetCharacters", func(ctx iris.Context) { ctx.JSON(APIGetCharacters(sessions.Get(ctx).Get("_id").(primitive.ObjectID))) })
 	})
 
 	app.PartyFunc("/user", func(user iris.Party) {
@@ -91,6 +91,9 @@ func main() {
 		user.Put("/u/{uid: string regexp([0-9a-f]) max(24)}", PutCharUpdate)          //更新未編入資料庫角色
 		user.Post("/{uid: int}/upload", PostCharUpload)                               //上傳已編入資料庫角色大頭照
 		user.Post("/u/{uid: string regexp([0-9a-f]) max(24)}/upload", PostCharUpload) //上傳未編入資料庫角色大頭照
+		user.Delete("/{uid: int}", DeleteChar)                                        //刪除資料庫角色
+		user.Delete("/u/{uid: string regexp([0-9a-f]) max(24)}", DeleteChar)          //刪除資料庫角色
+
 	})
 	app.PartyFunc("/admin", func(user iris.Party) {
 		user.Use(authentication)

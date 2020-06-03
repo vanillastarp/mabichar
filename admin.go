@@ -1,8 +1,6 @@
 package main
 
 import (
-	"context"
-	"log"
 	"strconv"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -82,7 +80,6 @@ func GetServers(ctx iris.Context) {
 	result, err := APIQueryBase("admin_Servers", bson.M{})
 
 	if err != nil {
-		//log.Fatal(err)
 		ctx.ViewData("message", err.Error())
 	}
 
@@ -101,7 +98,7 @@ func GetServerCreate(ctx iris.Context) {
 		"action": "/admin/servers/create",
 		"button": "新增",
 	})
-	if err := ctx.View("admin/serverEdit.html"); err != nil {
+	if err := ctx.View("admin/serverForm.html"); err != nil {
 		ctx.Application().Logger().Infof(err.Error())
 	}
 }
@@ -109,8 +106,6 @@ func GetServerCreate(ctx iris.Context) {
 //PostServerCreate 新增伺服器資料
 func PostServerCreate(ctx iris.Context) {
 	session := sessions.Get(ctx)
-
-	coll := DBSource.db.Collection("admin_Servers")
 	/*
 	   inputServerid
 	   inputServername
@@ -123,15 +118,14 @@ func PostServerCreate(ctx iris.Context) {
 		"serverEngName": ctx.PostValue("inputServerEngname"),
 	}
 
-	//err := coll.FindOne(context.TODO(), filter).Decode(&result)
-	insertResult, err := coll.InsertOne(context.TODO(), insertData)
+	result, err := APIInsertOneBase("admin_Servers", insertData)
 
 	if err != nil {
-		//log.Fatal(err)
 		session.SetFlash("msg", "發生錯誤，可能原因為重複編號.")
 	} else {
-		log.Println("Added a new server with objectID: ", insertResult.InsertedID)
-		session.SetFlash("msg", "已成功新增一筆伺服器")
+		// log.Println("Added a new server with objectID: ", result.InsertedID)
+		id := result.InsertedID.(primitive.ObjectID).Hex()
+		session.SetFlash("msg", "已成功新增一筆伺服器ID:"+id)
 	}
 	ctx.Redirect("/admin/servers")
 }
@@ -156,15 +150,15 @@ func GetServerEdit(ctx iris.Context) {
 		ctx.Redirect("/admin/servers")
 		return
 	}
+	ctx.ViewData("serverData", result)
 	ctx.ViewData("template", map[string]string{
 		"banner": "編輯",
 		"method": "PUT",
 		"action": "/admin/servers/",
 		"button": "更新",
 	})
-	ctx.ViewData("serverData", result)
 
-	if err := ctx.View("admin/serverEdit.html"); err != nil {
+	if err := ctx.View("admin/serverForm.html"); err != nil {
 		ctx.Application().Logger().Infof(err.Error())
 	}
 }
@@ -183,7 +177,9 @@ func PutServerUpdate(ctx iris.Context) {
 		   inputServerEngname
 		*/
 		inputServerid, _ := strconv.ParseInt(ctx.PostValue("inputServerid"), 10, 32)
-		filter := bson.M{"_id": id}
+		filter := bson.M{
+			"_id": id,
+		}
 		updateData := bson.M{
 			"$set": bson.M{
 				"serverid":      inputServerid,
@@ -209,35 +205,26 @@ func PutServerUpdate(ctx iris.Context) {
 //DelServer 刪除伺服器資料
 func DelServer(ctx iris.Context) {
 	session := sessions.Get(ctx)
-	// var msg string
 
-	coll := DBSource.db.Collection("admin_Servers")
 	id, err := primitive.ObjectIDFromHex(ctx.PostValue("_id"))
 
 	if err != nil {
-		// log.Fatal("primitive.ObjectIDFromHex ERROR:", err)
 		session.SetFlash("msg", "primitive.ObjectIDFromHex ERROR: "+err.Error())
 	} else {
 		deleteData := bson.M{
 			"_id": id,
 		}
-		deleteResult, err := coll.DeleteOne(context.TODO(), deleteData)
+
+		result, err := APIDeleteOneBase("admin_Servers", deleteData)
+
 		if err != nil {
-			// log.Fatal(err)
 			session.SetFlash("msg", "DelServer err:"+err.Error())
 		} else {
-
-			if deleteResult.DeletedCount == 0 {
-				// fmt.Println("DeleteOne() document not found:", deleteResult)
+			if result.DeletedCount == 0 {
 				session.SetFlash("msg", "發生錯誤，未能刪除id: "+id.Hex())
 			} else {
-				// Print the results of the DeleteOne() method
-				// fmt.Println("DeleteOne Result:", deleteResult)
 				session.SetFlash("msg", "已成功刪除id: "+id.Hex())
-				// *mongo.DeleteResult object returned by API call
-				// fmt.Println("DeleteOne TYPE:", reflect.TypeOf(deleteResult))
 			}
-			//ctx.ViewData("message", msg)
 		}
 	}
 	ctx.Redirect("/admin/servers")

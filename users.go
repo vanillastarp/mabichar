@@ -54,7 +54,8 @@ func GetCharList(ctx iris.Context) {
 	session := sessions.Get(ctx)
 
 	filter := bson.M{
-		"uid": session.Get("_id"), //用使用者的_id去找characters collection的uid
+		"uid":     session.Get("_id"), //用使用者的_id去找characters collection的uid
+		"enabled": true,
 	}
 
 	result, err := APIQueryBase("characters", filter)
@@ -81,7 +82,7 @@ func GetCharList(ctx iris.Context) {
 		}
 	}
 	ctx.ViewData("message", session.GetFlashString("msg"))
-	if err := ctx.View("users/charList.html"); err != nil {
+	if err := ctx.View("users/CharList.html"); err != nil {
 		ctx.Application().Logger().Infof(err.Error())
 	}
 }
@@ -102,8 +103,6 @@ func GetNewChar(ctx iris.Context) {
 //PostNewChar 新增角色
 func PostNewChar(ctx iris.Context) {
 	session := sessions.Get(ctx)
-
-	coll := DBSource.db.Collection("characters")
 	/*
 	   inputCharname
 	   inputBirthday
@@ -129,13 +128,13 @@ func PostNewChar(ctx iris.Context) {
 		"modify_timestamp": primitive.Timestamp{T: uint32(time.Now().Unix())},
 	}
 
-	//err := coll.FindOne(context.TODO(), filter).Decode(&result)
-	insertResult, err := coll.InsertOne(context.TODO(), insertData)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Added a new character with objectID: ", insertResult.InsertedID)
+	result, err := APIInsertOneBase("characters", insertData)
 
+	if err != nil {
+		session.SetFlash("msg", "發生錯誤，原因未知")
+	}
+	log.Println("Added a new character with objectID: ", result.InsertedID)
+	session.SetFlash("msg", "成功新增一筆角色")
 	ctx.Redirect("/user/char")
 }
 
@@ -276,6 +275,45 @@ func PutCharUpdate(ctx iris.Context) {
 			session.SetFlash("msg", "更新成功")
 		} else {
 			session.SetFlash("msg", "更新異常，您可能未異動資料")
+		}
+	}
+	ctx.Redirect("/user/char")
+}
+
+//DeleteChar 刪除角色(僅將enabled設成false)
+func DeleteChar(ctx iris.Context) {
+	session := sessions.Get(ctx)
+
+	var filter bson.M
+	if strings.HasPrefix(ctx.Path(), "/char/u/") {
+		id, _ := primitive.ObjectIDFromHex(ctx.Params().Get("uid"))
+		filter = bson.M{
+			"uid": session.Get("_id"),
+			"_id": id, //未編入角色(24碼)
+		}
+
+	} else {
+		charid, _ := strconv.ParseInt(ctx.Params().Get("uid"), 10, 32)
+		filter = bson.M{
+			"uid":         session.Get("_id"),
+			"characterId": charid,
+		}
+
+	}
+	update := bson.M{
+		"$set": bson.M{
+			"enabled": false,
+		}}
+
+	result, err := APIUpdateOneBase("characters", filter, update)
+
+	if err != nil {
+		session.SetFlash("msg", "發生錯誤，可能原因為重複編號.")
+	} else {
+		if result.ModifiedCount == 1 {
+			session.SetFlash("msg", "刪除成功")
+		} else {
+			session.SetFlash("msg", "刪除異常，您可能未異動資料")
 		}
 	}
 	ctx.Redirect("/user/char")
