@@ -1,43 +1,48 @@
-{{ define "admin/serverForm-head" }}
-    <script src="/static/js/admin_functions.js"></script>
+{{ define "admin/talentMastersForm-head" }}
+    
 {{ end }}
 
-{{ define "admin/serverForm-body" }}
+{{ define "admin/talentMastersForm-body" }}
 <div class="container">
-    <h1 class="mt-4">{{ .template.banner }}伺服器</h1>
+    <h1 class="mt-4">{{ .template.banner }}一代宗師</h1>
     <hr>
     <div class="jumbotron">
-        <form name="EditForm" method="POST" action='{{ .template.action }}{{ .serverData._id.Hex }}'>
-            <input type="hidden" name="_id" id="_id" value="{{ .serverData._id.Hex }}"/>
+        <form name="EditForm" method="POST" action='{{ .template.action }}{{ .talentData._id.Hex }}'>
+            <input type="hidden" name="_id" id="_id" value="{{ .talentData._id.Hex }}"/>
             <input type="hidden" name="_method" value='{{ .template.method }}'>
             <div class="row">
                 <div class="col-md-6 offset-md-3">
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
-                            <span class="input-group-text" id="inputServerid">伺服器編號</span>
+                            <span class="input-group-text">一代宗師類別</span>
                         </div>
-                        <input type="text" name="inputServerid" id="inputServerid" value="{{ .serverData.serverid }}"
-                            class="form-control" placeholder="輸入伺服器編號" aria-label="伺服器編號" aria-describedby="inputServerid" required>
+                        <input type="text" name="inputCategory" id="inputCategory" value="{{ .talentData.category }}"
+                            class="form-control" placeholder="輸入一代宗師類別" aria-label="一代宗師類別" aria-describedby="inputCategory" required>
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
-                            <span class="input-group-text" id="inputServername">伺服器名稱</span>
+                            <span class="input-group-text">才能編號</span>
                         </div>
-                        <input type="text" name="inputServername" id="inputServername" value="{{ .serverData.serverName }}"
-                            class="form-control" placeholder="輸入伺服器名稱" aria-label="伺服器名稱" aria-describedby="inputServername"
-                            required>
+                        <input type="text" name="inputTitleid" id="inputTitleid" value="{{ .talentData.titleid }}"
+                            class="form-control" placeholder="輸入才能編號" aria-label="才能編號" aria-describedby="inputTitleid" required>
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
-                            <span class="input-group-text" id="inputServerEngname">英文名稱</span>
+                            <span class="input-group-text">才能名稱</span>
                         </div>
-                        <input type="text" name="inputServerEngname" id="inputServerEngname" value="{{ .serverData.serverEngName }}"
-                            class="form-control" placeholder="輸入英文名稱" aria-label="英文名稱" aria-describedby="inputServerEngname"
-                            required>
+                        <input type="text" name="inputTalentTitle" id="inputTalentTitle" value="{{ .talentData.talenttitle }}"
+                            class="form-control" placeholder="輸入才能名稱" aria-label="才能名稱" aria-describedby="inputTalentTitle" required>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">才能等級</span>
+                        </div>
+                        <input type="text" name="inputTalentlevel" id="inputTalentlevel" value="{{ .talentData.talentlevel }}"
+                            class="form-control" placeholder="輸入才能等級" aria-label="才能名稱" aria-describedby="inputTalentlevel" required>
                     </div>
                     <div class="input-group mb-3">
                         <div class="col">
-                            <a href="/admin/servers" class="btn btn-info active" role="button" aria-pressed="true">回伺服器列表</a>
+                            <a href="/admin/talentmasters" class="btn btn-info active" role="button" aria-pressed="true">回才能列表</a>
                         </div>
                         <div class="col text-center">
                             {{ if eq .template.method "PUT" }}

@@ -15,3 +15,18 @@ function delAction(action, path) {
         }
     }
 }
+
+function GetSkillsToList(){
+    $.get( "/api/GetSkills", function( data ) {
+        $(data).each(function( key,val ) {
+            row = 
+            "<tr>"+
+            "<td scope=\"row\">"+val["skillid"]+"</td>"+
+            "<td>"+val["skillName"]+"</td>"+
+            "<td>"+val["maxlv"]+"</td>"+
+            "<td><a class=\"btn btn-primary\" href=\"/admin/skills/"+val["skillid"]+"/edit\" role=\"button\">編輯</a></td>"+
+            "</tr>";
+            $("#s"+val["skilltype"]+" tbody").append(row);
+        })
+    })
+}

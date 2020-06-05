@@ -7,8 +7,9 @@
         <meta name="description" content="">
         <title>Mabinogi Charactor Memoir - Admin</title>
         <link href="/static/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-        <!-- <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script> -->
-        <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+        <script src="/static/js/jquery-3.5.1.min.js"></script>
+        <script src="/static/js/popper.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
         {{ part "head" }}
         <style>
             /* Show it is fixed to the top */
@@ -52,7 +53,7 @@
                                 <a class="dropdown-item" href="/admin/achievements">成就列表</a>
                                 <a class="dropdown-item" href="/admin/skills">技能列表</a>
                                 <a class="dropdown-item" href="/admin/titles">稱號列表</a>
-                                <a class="dropdown-item" href="/admin/talent_masters">一代宗師列表</a>
+                                <a class="dropdown-item" href="/admin/talentmasters">一代宗師列表</a>
                                 <a class="dropdown-item" href="/admin/pets">寵物列表</a>
                                 <a class="dropdown-item" href="/admin/collections">收集日誌</a>
                                 <a class="dropdown-item" href="/admin/events">官方活動</a>
@@ -74,9 +75,7 @@
 
         {{ part "body" }}
         {{ yield }}
-        <script src="/static/js/jquery-3.4.1.slim.min.js"></script>
-        <script src="/static/js/popper.min.js"></script>
-        <script src="/static/js/bootstrap.min.js"></script>
+        
         <!-- <script type="text/javascript" src="https://momentjs.com/downloads/moment.min.js"></script> -->
     </body>
 </html>

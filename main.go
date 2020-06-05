@@ -63,6 +63,29 @@ func main() {
 	app.Layout("shared/layout.html")
 	config := iris.WithConfiguration(iris.YAML("./configs/iris.yaml"))
 
+	// app.Post("/api/Login", func(ctx iris.Context) {
+	// 	session := sessions.Get(ctx)
+
+	// 	filter := bson.M{
+	// 		"username": ctx.PostValue("username"),
+	// 		"password": "",
+	// 		"enabled":  true,
+	// 	}
+
+	// 	result, err := APILogin(filter)
+
+	// 	if err != nil {
+	// 		ctx.JSON(result)
+	// 	} else {
+	// 		session.Set("authenticated", true)
+	// 		session.Set("username", result["username"])
+	// 		session.Set("_id", result["_id"])
+	// 		session.Set("role", result["rolename"])
+	// 		// ctx.SetCookie()
+	// 		ctx.JSON(result)
+	// 	}
+	// })
+
 	app.PartyFunc("/api", func(api iris.Party) {
 		api.Use(authentication)
 		api.Get("/GetSkills", func(ctx iris.Context) { ctx.JSON(APIGetSkills()) })
@@ -104,12 +127,25 @@ func main() {
 		user.Get("/game_version", GetGameVersion)
 		user.Get("/achievements", GetAchievements)
 		user.Get("/skills", GetSkills)
-		user.Get("/titles", GetTitles)
-		user.Get("/talent_masters", GetTalentMasters)
+
 		user.Get("/pets", GetPets)
 		user.Get("/collections", GetCollections)
 		user.Get("/events", GetEvents)
 		user.Get("/stories", GetStories)
+
+		user.Get("/titles", GetTitles)                                             //列出稱號清單
+		user.Get("/titles/create", GetTitleCreate)                                 //新增稱號表單
+		user.Post("/titles/create", PostTitleCreate)                               //新增稱號資料
+		user.Get("/titles/{titleid: int}/edit", GetTitleEdit)                      //編輯稱號表單
+		user.Put("/titles/{_id: string regexp([0-9a-f]) max(24)}", PutTitleUpdate) //更新稱號資料
+		user.Delete("/titles/{_id: string regexp([0-9a-f]) max(24)}", DelTitle)    //刪除稱號資料
+
+		user.Get("/talentmasters", GetTalentMasters)                                             //列出才能清單
+		user.Get("/talentmasters/create", GetTalentMasterCreate)                                 //新增才能表單
+		user.Post("/talentmasters/create", PostTalentMasterCreate)                               //新增才能資料
+		user.Get("/talentmasters/{titleid: int}/edit", GetTalentMasterEdit)                      //編輯才能表單
+		user.Put("/talentmasters/{_id: string regexp([0-9a-f]) max(24)}", PutTalentMasterUpdate) //更新才能資料
+		user.Delete("/talentmasters/{_id: string regexp([0-9a-f]) max(24)}", DelTalentMaster)    //刪除才能資料
 
 		user.Get("/servers", GetServers)                                             //列出伺服器清單
 		user.Get("/servers/create", GetServerCreate)                                 //新增伺服器表單
@@ -185,10 +221,9 @@ func main() {
 					session.SetFlash("msg", "發生錯誤：可能原因為重複帳號.")
 					ctx.Redirect("/register")
 					return
-				} else {
-					log.Println("Added a new server with objectID: ", insertResult.InsertedID)
-					session.SetFlash("msg", "已成功建立帳號")
 				}
+				log.Println("Added a new server with objectID: ", insertResult.InsertedID)
+				session.SetFlash("msg", "已成功建立帳號")
 			}
 			ctx.Redirect("/user")
 		})

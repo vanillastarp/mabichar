@@ -5,21 +5,25 @@
 
 {{ define "share-body" }}
 <main role="main" class="container">
-    <div>
-        <p>此表格依照角色建立日期為主</p>
-        <p>由於安黛莉伺服器、凱琳伺服器及迪恩伺服器在2020/4/23後合併成娜歐伺服器，故2020/4/23之前的角色皆歸類至合併前的伺服器</p>
-        <ul class="nav nav-tabs" id="serverListTab" role="tablist">
-            {{ range $i, $v := .serverList }}
-            <li class="nav-item">
-              <a class="nav-link{{if eq $i 1}} active {{ end }}" id="{{ .serverEngName }}-tab" data-toggle="tab" href="#{{ .serverEngName }}" role="tab" aria-controls="{{ .serverEngName }}"{{if eq $i 1}} aria-selected="true"{{ end }}>{{ .serverName }}</a>
-            </li>
-            {{ end }}
-          </ul>
-          <div class="tab-content" id="serverListTabContent">
-            {{ range $i, $v := .serverList }}
-            <div class="tab-pane fade{{if eq $i 1}} show active{{ end }}" id="{{ .serverEngName }}" role="tabpanel" aria-labelledby="{{ .serverEngName }}-tab">{{ .serverName }}</div>
-            {{ end }}
-          </div>
+  <div>
+    <p>此表格依照角色建立日期為主</p>
+    <p>由於安黛莉伺服器、凱琳伺服器及迪恩伺服器在2020/4/23後合併成娜歐伺服器，故2020/4/23之前的角色皆歸類至合併前的伺服器</p>
+    <ul class="nav nav-tabs" id="serverListTab" role="tablist">
+      {{ range $i, $v := .serverList }}
+      <li class="nav-item">
+        <a class="nav-link{{if eq $i 1}} active {{ end }}" id="{{ .serverEngName }}-tab" data-toggle="tab"
+          href="#{{ .serverEngName }}" role="tab" aria-controls="{{ .serverEngName }}" {{if eq $i 1}}
+          aria-selected="true" {{ end }}>{{ .serverName }}</a>
+      </li>
+      {{ end }}
+    </ul>
+    <div class="tab-content" id="serverListTabContent">
+      {{ range $i, $v := .serverList }}
+      <div class="tab-pane fade{{if eq $i 1}} show active{{ end }}" id="{{ .serverEngName }}" role="tabpanel"
+        aria-labelledby="{{ .serverEngName }}-tab">{{ .serverName }}</div>
+      {{ end }}
     </div>
+
+  </div>
 </main>
 {{ end }}

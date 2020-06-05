@@ -4,11 +4,11 @@ import (
 	"context"
 	"log"
 	"os"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"strconv"
 
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -63,6 +63,23 @@ func APIGetServerList(DBSource *DBStruct, AdminDB *AdminDBStruct) {
 // 此區域為提供資料庫操作API
 //----------------------------------------------
 */
+
+//APILogin 登入
+// func APILogin(filter bson.M) (bson.M, error) {
+// 	result, err := APIQueryOneBase("users_role", filter)
+// 	if err != nil {
+// 		if err == mongo.ErrNoDocuments {
+// 			return bson.M{"msg": "無法登入，請確認您的帳號密碼是否正確"}, err
+// 		}
+// 		return bson.M{"msg": "無法登入"}, err
+// 	}
+// 	return bson.M{
+// 		"authenticated": true,
+// 		"username":      result["username"],
+// 		"_id":           result["_id"],
+// 		"role":          result["rolename"],
+// 	}, nil
+// }
 
 //APIQueryBase 提供多筆查詢基底
 func APIQueryBase(targetCollection string, filter bson.M) ([]bson.M, error) {
@@ -131,6 +148,16 @@ func APIGetSkills() []bson.M {
 	return res
 }
 
+//APIGetTalentMasters 提供才能清單
+func APIGetTalentMasters() []bson.M {
+	res, err := APIQueryBase("admin_Talent_masters", bson.M{})
+	if err != nil {
+		log.Println(err.Error())
+		return []bson.M{}
+	}
+	return res
+}
+
 //APIGetServers 提供伺服器清單
 func APIGetServers() []bson.M {
 	res, err := APIQueryBase("admin_Servers", bson.M{})
@@ -143,10 +170,50 @@ func APIGetServers() []bson.M {
 
 //APIGetCharacters 提供角色清單
 func APIGetCharacters(id primitive.ObjectID) []bson.M {
-	res, err := APIQueryBase("characters", bson.M{"uid": id})
+	res, err := APIQueryBase("characters", bson.M{"uid": id, "enabled": true})
 	if err != nil {
 		log.Println(err.Error())
 		return []bson.M{}
 	}
 	return res
+}
+
+//APIGetSkillsType 提供技能類別清單
+func APIGetSkillsType() map[int]string {
+	skilltypes := map[int]string{
+		1:   "生活",
+		2:   "戰鬥",
+		3:   "魔法",
+		4:   "煉金術",
+		5:   "武鬥術",
+		6:   "音樂",
+		7:   "人偶術",
+		8:   "雙槍",
+		9:   "忍者",
+		10:  "鎖鏈",
+		30:  "隱藏才能",
+		50:  "變身",
+		51:  "半神化",
+		52:  "騎士團",
+		53:  "異神化",
+		54:  "特性",
+		55:  "寵物特技",
+		100: "動作",
+	}
+	return skilltypes
+}
+
+/*
+//----------------------------------------------
+// 此區域為雜項API
+//----------------------------------------------
+*/
+
+//APIParseInt 字串轉數字
+func APIParseInt(s string) int32 {
+	o, err := strconv.ParseInt(s, 10, 32)
+	if err != nil {
+		return -1
+	}
+	return int32(o)
 }
