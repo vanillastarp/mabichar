@@ -1,1 +1,1 @@
-{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"mabichar.admin_Servers"}],"uuid":"1ffa029e16ff42ccb0f61cc77ea6f909"}
+{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"mabichar.admin_Servers"},{"v":{"$numberInt":"2"},"unique":true,"key":{"serverid":{"$numberInt":"1"}},"name":"uniq_id","ns":"mabichar.admin_Servers","background":false}],"uuid":"c786e44dbe374706bb3344d7d882e24e"}

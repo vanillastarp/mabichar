@@ -54,9 +54,10 @@ func PostAdminCreateBase(ctx iris.Context, targetCollection string, insertData b
 
 	if err != nil {
 		session.SetFlash("msg", "發生錯誤，可能原因為重複編號.")
+	} else {
+		id := result.InsertedID.(primitive.ObjectID).Hex()
+		session.SetFlash("msg", "已成功新增一筆ID:"+id)
 	}
-	id := result.InsertedID.(primitive.ObjectID).Hex()
-	session.SetFlash("msg", "已成功新增一筆ID:"+id)
 
 	ctx.Redirect("/admin/" + backTo)
 }
@@ -146,11 +147,82 @@ func GetAchievements(ctx iris.Context) {
 //GetSkills 技能列表
 func GetSkills(ctx iris.Context) {
 	session := sessions.Get(ctx)
-	ctx.ViewData("skilltypes", APIGetSkillsType())
+	ctx.ViewData("skilltypes", APIGetSkillTypes())
 	ctx.ViewData("message", session.GetFlashString("msg"))
 	if err := ctx.View("admin/skillsList.html"); err != nil {
 		ctx.Application().Logger().Infof(err.Error())
 	}
+}
+
+//GetSkillCreate 新增技能表單
+func GetSkillCreate(ctx iris.Context) {
+	GetAdminCreateBase(ctx, "skills", "skillsForm")
+}
+
+//PostSkillCreate 新增技能資料
+func PostSkillCreate(ctx iris.Context) {
+	/*
+	   inputSkillType
+	   inputSkillid
+	   inputSkillName
+	   inputskilllevel
+	   inputRace
+	   inputUpgrade
+	*/
+	insertData := bson.M{
+		"skilltype": APIParseInt(ctx.PostValue("inputSkillType")),
+		"skillid":   APIParseInt(ctx.PostValue("inputSkillid")),
+		"skillName": ctx.PostValue("inputSkillName"),
+		"maxlv":     APIParseInt(ctx.PostValue("inputskilllevel")),
+		"race":      APIParseInt(ctx.PostValue("inputRace")),
+		"upgrade":   APIBool(ctx.PostValue("inputUpgrade")),
+	}
+	PostAdminCreateBase(ctx, "admin_Skills", insertData, "skills")
+}
+
+//GetSkillEdit 編輯技能表單
+func GetSkillEdit(ctx iris.Context) {
+	filter := bson.M{
+		"skillid": APIParseInt(ctx.Params().Get("skillid")),
+	}
+
+	GetAdminEditBase(ctx, "admin_Skills", filter, "skills", "skillData", "skillsForm")
+}
+
+//PutSkillUpdate 更新技能資料
+func PutSkillUpdate(ctx iris.Context) {
+	if id, err := primitive.ObjectIDFromHex(ctx.PostValue("_id")); err != nil {
+		session := sessions.Get(ctx)
+		session.SetFlash("msg", "primitive.ObjectIDFromHex ERROR: "+err.Error())
+		ctx.Redirect("/admin/skills")
+	} else {
+		/*
+		   inputSkillType
+		   inputSkillid
+		   inputSkillName
+		   inputskilllevel
+		   inputRace
+		   inputUpgrade
+		*/
+		filter := bson.M{
+			"_id": id,
+		}
+		updateData := bson.M{
+			"$set": bson.M{
+				"skilltype": APIParseInt(ctx.PostValue("inputSkillType")),
+				"skillid":   APIParseInt(ctx.PostValue("inputSkillid")),
+				"skillName": ctx.PostValue("inputSkillName"),
+				"maxlv":     APIParseInt(ctx.PostValue("inputskilllevel")),
+				"race":      APIParseInt(ctx.PostValue("inputRace")),
+				"upgrade":   APIBool(ctx.PostValue("inputUpgrade")),
+			}}
+		PutAdminUpdateBase(ctx, "admin_Skills", filter, updateData, "skills")
+	}
+}
+
+//DelSkill 刪除技能資料
+func DelSkill(ctx iris.Context) {
+	DelAdminBase(ctx, "admin_Skills", "skills")
 }
 
 //------------------- Titles --------------------
@@ -167,17 +239,63 @@ func GetTitleCreate(ctx iris.Context) {
 
 //PostTitleCreate 新增稱號資料
 func PostTitleCreate(ctx iris.Context) {
-	ctx.Writef("稱號列表")
+	/*
+	   inputType
+	   inputTitleid
+	   inputTitleDefaultName
+	   inputTitleMaleName
+	   inputTitleFemaleName
+	   inputTitleUniName
+	*/
+	insertData := bson.M{
+		"type":        APIParseInt(ctx.PostValue("inputType")),
+		"id":          APIParseInt(ctx.PostValue("inputTitleid")),
+		"defaultname": ctx.PostValue("inputTitleDefaultName"),
+		"malename":    ctx.PostValue("inputTitleMaleName"),
+		"femalename":  ctx.PostValue("inputTitleFemaleName"),
+		"uniname":     ctx.PostValue("inputTitleUniName"),
+	}
+	PostAdminCreateBase(ctx, "admin_Titles", insertData, "titles")
 }
 
 //GetTitleEdit 編輯稱號表單
 func GetTitleEdit(ctx iris.Context) {
-	ctx.Writef("稱號列表")
+	filter := bson.M{
+		"titleid": APIParseInt(ctx.Params().Get("titleid")),
+	}
+
+	GetAdminEditBase(ctx, "admin_Titles", filter, "titles", "titleData", "titlesForm")
 }
 
 //PutTitleUpdate 更新稱號資料
 func PutTitleUpdate(ctx iris.Context) {
-	ctx.Writef("稱號列表")
+	if id, err := primitive.ObjectIDFromHex(ctx.PostValue("_id")); err != nil {
+		session := sessions.Get(ctx)
+		session.SetFlash("msg", "primitive.ObjectIDFromHex ERROR: "+err.Error())
+		ctx.Redirect("/admin/titles")
+	} else {
+		/*
+		   inputType
+		   inputTitleid
+		   inputTitleDefaultName
+		   inputTitleMaleName
+		   inputTitleFemaleName
+		   inputTitleUniName
+		*/
+		filter := bson.M{
+			"_id": id,
+		}
+		updateData := bson.M{
+			"$set": bson.M{
+				"type":        APIParseInt(ctx.PostValue("inputType")),
+				"id":          APIParseInt(ctx.PostValue("inputTitleid")),
+				"defaultname": ctx.PostValue("inputTitleDefaultName"),
+				"malename":    ctx.PostValue("inputTitleMaleName"),
+				"femalename":  ctx.PostValue("inputTitleFemaleName"),
+				"uniname":     ctx.PostValue("inputTitleUniName"),
+			}}
+		PutAdminUpdateBase(ctx, "admin_Titles", filter, updateData, "titles")
+	}
 }
 
 //DelTitle 刪除稱號資料
@@ -189,7 +307,12 @@ func DelTitle(ctx iris.Context) {
 
 //GetTalentMasters 才能列表
 func GetTalentMasters(ctx iris.Context) {
-	GetAdminListBase(ctx, "admin_Talent_masters", "talentMastersList")
+	session := sessions.Get(ctx)
+	ctx.ViewData("talenttypes", APIGetTalentTypes())
+	ctx.ViewData("message", session.GetFlashString("msg"))
+	if err := ctx.View("admin/talentMastersList.html"); err != nil {
+		ctx.Application().Logger().Infof(err.Error())
+	}
 }
 
 //GetTalentMasterCreate 新增才能表單
@@ -201,26 +324,26 @@ func GetTalentMasterCreate(ctx iris.Context) {
 func PostTalentMasterCreate(ctx iris.Context) {
 	/*
 		inputCategory
-		inputTitleid
+		inputTalentid
 		inputTalentTitle
 		inputTalentlevel
 	*/
 	insertData := bson.M{
 		"category":    APIParseInt(ctx.PostValue("inputCategory")),
-		"titleid":     APIParseInt(ctx.PostValue("inputTitleid")),
+		"talentid":    APIParseInt(ctx.PostValue("inputTalentid")),
 		"talenttitle": ctx.PostValue("inputTalentTitle"),
 		"talentlevel": APIParseInt(ctx.PostValue("inputTalentlevel")),
 	}
-	PostAdminCreateBase(ctx, "admin_Talent_masters", insertData, "talentmasters")
+	PostAdminCreateBase(ctx, "admin_TalentMasters", insertData, "talentmasters")
 }
 
 //GetTalentMasterEdit 編輯才能表單
 func GetTalentMasterEdit(ctx iris.Context) {
 	filter := bson.M{
-		"titleid": APIParseInt(ctx.Params().Get("titleid")),
+		"talentid": APIParseInt(ctx.Params().Get("talentid")),
 	}
 
-	GetAdminEditBase(ctx, "admin_Talent_masters", filter, "talentmasters", "talentData", "talentMastersForm")
+	GetAdminEditBase(ctx, "admin_TalentMasters", filter, "talentmasters", "talentData", "talentMastersForm")
 }
 
 //PutTalentMasterUpdate 更新才能資料
@@ -232,7 +355,7 @@ func PutTalentMasterUpdate(ctx iris.Context) {
 	} else {
 		/*
 			inputCategory
-			inputTitleid
+			inputTalentid
 			inputTalentTitle
 			inputTalentlevel
 		*/
@@ -242,18 +365,18 @@ func PutTalentMasterUpdate(ctx iris.Context) {
 		updateData := bson.M{
 			"$set": bson.M{
 				"category":    APIParseInt(ctx.PostValue("inputCategory")),
-				"titleid":     APIParseInt(ctx.PostValue("inputTitleid")),
+				"talentid":    APIParseInt(ctx.PostValue("inputTalentid")),
 				"talenttitle": ctx.PostValue("inputTalentTitle"),
 				"talentlevel": APIParseInt(ctx.PostValue("inputTalentlevel")),
 			}}
 
-		PutAdminUpdateBase(ctx, "admin_Talent_masters", filter, updateData, "talentmasters")
+		PutAdminUpdateBase(ctx, "admin_TalentMasters", filter, updateData, "talentmasters")
 	}
 }
 
 //DelTalentMaster 刪除才能資料
 func DelTalentMaster(ctx iris.Context) {
-	DelAdminBase(ctx, "admin_Talent_masters", "talentmasters")
+	DelAdminBase(ctx, "admin_TalentMasters", "talentmasters")
 }
 
 //------------------- Pets --------------------

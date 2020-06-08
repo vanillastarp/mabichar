@@ -1,0 +1,112 @@
+{{ define "admin/skillsForm-head" }}
+<script src="/static/js/admin_functions.js"></script>
+<script>
+  $( document ).ready(function() {
+    GetSkillTypesToList();
+  });
+</script>
+{{ end }}
+
+{{ define "admin/skillsForm-body" }}
+<div class="container">
+    <h1 class="mt-4">{{ .template.banner }}技能</h1>
+    <hr>
+    <div class="jumbotron">
+        <form name="EditForm" method="POST" action='{{ .template.action }}{{ .skillData._id.Hex }}'>
+            <input type="hidden" name="_id" id="_id" value="{{ .skillData._id.Hex }}"/>
+            <input type="hidden" name="_method" value='{{ .template.method }}'>
+            <input type="hidden" name="skilltype" id="skilltype" value='{{ .skillData.skilltype }}'>
+            <input type="hidden" name="race" id="race" value='{{ .skillData.race }}'>
+            <input type="hidden" name="upgrade" id="upgrade" value='{{ .skillData.upgrade }}'>
+            <div class="row">
+                <div class="col-md-6 offset-md-3">
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">技能類別</span>
+                        </div>
+                        <select class="custom-select" name="inputSkillType" id="inputSkillType">
+                            <option value="0">請選擇</option>
+                        </select>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">技能編號</span>
+                        </div>
+                        <input type="text" name="inputSkillid" id="inputSkillid" value="{{ .skillData.skillid }}"
+                            class="form-control" placeholder="輸入技能編號" aria-label="技能編號" aria-describedby="inputSkillid" required>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">技能名稱</span>
+                        </div>
+                        <input type="text" name="inputSkillName" id="inputSkillName" value="{{ .skillData.skillName }}"
+                            class="form-control" placeholder="輸入技能名稱" aria-label="技能名稱" aria-describedby="inputSkillName" required>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">技能最大等級</span>
+                        </div>
+                        <input type="text" name="inputskilllevel" id="inputskilllevel" value="{{ .skillData.maxlv }}"
+                            class="form-control" placeholder="輸入技能最大等級" aria-label="技能最大等級" aria-describedby="inputskilllevel" required>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">適用種族</span>
+                        </div>
+                        <select class="custom-select" name="inputRace" id="inputRace">
+                            <option value="0" selected>共通</option>
+                            <option value="1">人類</option>
+                            <option value="2">精靈</option>
+                            <option value="3">巨人</option>
+                        </select>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">可否升段</span>
+                        </div>
+                        <select class="custom-select" name="inputUpgrade" id="inputUpgrade">
+                            <option value="false" selected>不可</option>
+                            <option value="true">可以</option>
+                        </select>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="col">
+                            <a href="/admin/skills" class="btn btn-info active" role="button" aria-pressed="true">回技能列表</a>
+                        </div>
+                        <div class="col text-center">
+                            {{ if eq .template.method "PUT" }}
+                            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#ModalCenter"
+                                onclick="delAction(false,'')">刪除</button>
+                            {{ end }}
+                        </div>
+                        <div class="col text-right">
+                            <button class="btn btn-primary" type="submit">{{ .template.button }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalTitle">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="ModalContent">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="delAction(true,'/admin/skills/');">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

@@ -1,5 +1,10 @@
 {{ define "admin/talentMastersList-head" }}
-    
+<script src="/static/js/admin_functions.js"></script>
+<script>
+  $( document ).ready(function() {
+    GetTalentsToList();
+  });
+</script>
 {{ end }}
 
 {{ define "admin/talentMastersList-body" }}
@@ -8,27 +13,36 @@
     <span>{{ .message }}</span>
     <a class="btn btn-primary" href="/admin/talentmasters/create" role="button">新增才能</a>
   </p>
-  <table class="table table-sm table-bordered">
-    <thead>
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">類別</th>
-        <th scope="col">名稱</th>
-        <th scope="col">等級</th>
-        <th scope="col">編輯</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{ range .talentMastersList }}
-      <tr>
-        <td scope="row">{{ .titleid }}</td>
-        <td>{{ .category }}</td>
-        <td>{{ .talenttitle }}</td>
-        <td>{{ .talentlevel }}</td>
-        <td><a class="btn btn-primary" href="/admin/talentmasters/{{ .titleid }}/edit" role="button">編輯</a></td>
-      </tr>
-      {{ end }}
-    </tbody>
-  </table>
+
+  <ul class="nav nav-tabs" id="talentListTab" role="tablist">
+    {{ range $i, $v := .talenttypes }}
+    <li class="nav-item">
+      <a class="nav-link{{if eq $i 985}} active {{ end }}" id="s{{ $i }}-tab" data-toggle="tab"
+        href="#s{{ $i }}" role="tab" aria-controls="s{{ $i }}" {{if eq $i 1}} aria-selected="true"
+        {{ end }}>{{ $v }}</a>
+    </li>
+    {{ end }}
+  </ul>
+
+  <div class="tab-content" id="talentListTabContent">
+    {{ range $i, $v := .talenttypes }}
+    <div class="tab-pane fade{{if eq $i 985}} show active{{ end }}" id="s{{ $i }}" role="tabpanel" aria-labelledby="s{{ $i }}-tab">
+      <table class="table table-sm table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">類別</th>
+            <th scope="col">名稱</th>
+            <th scope="col">等級</th>
+            <th scope="col">編輯</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+      </table>
+    </div>
+    {{ end }}
+  </div>
 </main>
 {{ end }}

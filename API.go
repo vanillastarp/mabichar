@@ -148,9 +148,9 @@ func APIGetSkills() []bson.M {
 	return res
 }
 
-//APIGetTalentMasters 提供才能清單
-func APIGetTalentMasters() []bson.M {
-	res, err := APIQueryBase("admin_Talent_masters", bson.M{})
+//APIGetTalents 提供才能清單
+func APIGetTalents() []bson.M {
+	res, err := APIQueryBase("admin_TalentMasters", bson.M{})
 	if err != nil {
 		log.Println(err.Error())
 		return []bson.M{}
@@ -178,9 +178,9 @@ func APIGetCharacters(id primitive.ObjectID) []bson.M {
 	return res
 }
 
-//APIGetSkillsType 提供技能類別清單
-func APIGetSkillsType() map[int]string {
-	skilltypes := map[int]string{
+//APIGetSkillTypes 提供技能類別清單
+func APIGetSkillTypes() map[int]string {
+	skillTypes := map[int]string{
 		1:   "生活",
 		2:   "戰鬥",
 		3:   "魔法",
@@ -200,8 +200,40 @@ func APIGetSkillsType() map[int]string {
 		55:  "寵物特技",
 		100: "動作",
 	}
-	return skilltypes
+	return skillTypes
 }
+
+//APIGetTalentTypes 提供才能類別清單
+func APIGetTalentTypes() map[int]string {
+	talentTypes := map[int]string{
+		985:  "冒險家",
+		1000: "戰士",
+		999:  "魔法師",
+		998:  "弓箭手",
+		997:  "商人",
+		996:  "戰鬥鍊金術師",
+		995:  "武鬥家",
+		994:  "吟遊詩人",
+		1001: "人偶師",
+		993:  "長槍手",
+		992:  "聖職者",
+		991:  "鍊成鍊金術師",
+		990:  "廚師",
+		989:  "鐵匠",
+		988:  "裁縫師",
+		987:  "藥劑師",
+		986:  "木匠",
+		1002: "雙槍手",
+		1003: "忍者",
+		1004: "闇夜鎖鏈師",
+	}
+	return talentTypes
+}
+
+// //APIGetTitleType 提供稱號編號範圍
+// func APIGetTitleType() map[int]string {
+
+// }
 
 /*
 //----------------------------------------------
@@ -216,4 +248,12 @@ func APIParseInt(s string) int32 {
 		return -1
 	}
 	return int32(o)
+}
+
+//APIBool 字串轉布林
+func APIBool(s string) bool {
+	if s == "true" {
+		return true
+	}
+	return false
 }

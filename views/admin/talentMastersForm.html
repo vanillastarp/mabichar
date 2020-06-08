@@ -1,30 +1,37 @@
 {{ define "admin/talentMastersForm-head" }}
-    
+<script src="/static/js/admin_functions.js"></script>
+<script>
+  $( document ).ready(function() {
+    GetTalentTypesToList();
+  });
+</script>
 {{ end }}
 
 {{ define "admin/talentMastersForm-body" }}
 <div class="container">
-    <h1 class="mt-4">{{ .template.banner }}一代宗師</h1>
+    <h1 class="mt-4">{{ .template.banner }}才能</h1>
     <hr>
     <div class="jumbotron">
         <form name="EditForm" method="POST" action='{{ .template.action }}{{ .talentData._id.Hex }}'>
             <input type="hidden" name="_id" id="_id" value="{{ .talentData._id.Hex }}"/>
             <input type="hidden" name="_method" value='{{ .template.method }}'>
+            <input type="hidden" name="Category" id="Category" value='{{ .talentData.category }}'>
             <div class="row">
                 <div class="col-md-6 offset-md-3">
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">一代宗師類別</span>
+                            <span class="input-group-text">才能類別</span>
                         </div>
-                        <input type="text" name="inputCategory" id="inputCategory" value="{{ .talentData.category }}"
-                            class="form-control" placeholder="輸入一代宗師類別" aria-label="一代宗師類別" aria-describedby="inputCategory" required>
+                        <select class="custom-select" name="inputCategory" id="inputCategory">
+                            <option value="0">請選擇</option>
+                        </select>
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text">才能編號</span>
                         </div>
-                        <input type="text" name="inputTitleid" id="inputTitleid" value="{{ .talentData.titleid }}"
-                            class="form-control" placeholder="輸入才能編號" aria-label="才能編號" aria-describedby="inputTitleid" required>
+                        <input type="text" name="inputTalentid" id="inputTalentid" value="{{ .talentData.talentid }}"
+                            class="form-control" placeholder="輸入才能編號" aria-label="才能編號" aria-describedby="inputTalentid" required>
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
@@ -75,7 +82,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="delAction(true,'/admin/servers/');">Yes</button>
+                <button type="button" class="btn btn-primary" onclick="delAction(true,'/admin/talentmasters/');">Yes</button>
             </div>
         </div>
     </div>

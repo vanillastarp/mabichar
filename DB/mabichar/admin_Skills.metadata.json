@@ -1,1 +1,1 @@
-{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"mabichar.admin_Skills"}],"uuid":"43a440363e3843f094dfe6a7998a2912"}
+{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"mabichar.admin_Skills"},{"v":{"$numberInt":"2"},"unique":true,"key":{"skillid":{"$numberInt":"1"}},"name":"uniq_id","ns":"mabichar.admin_Skills","background":false}],"uuid":"4fd5de89675c4eb782c9cfa5904c9324"}

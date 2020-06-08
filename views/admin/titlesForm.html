@@ -1,0 +1,102 @@
+{{ define "admin/titlesForm-head" }}
+<script src="/static/js/admin_functions.js"></script>
+<script>
+  $( document ).ready(function() {
+      
+  });
+</script>
+{{ end }}
+
+{{ define "admin/titlesForm-body" }}
+<div class="container">
+    <h1 class="mt-4">{{ .template.banner }}稱號</h1>
+    <hr>
+    <div class="jumbotron">
+        <form name="EditForm" method="POST" action='{{ .template.action }}{{ .titleData._id.Hex }}'>
+            <input type="hidden" name="_id" id="_id" value="{{ .titleData._id.Hex }}"/>
+            <input type="hidden" name="_method" value='{{ .template.method }}'>
+            <div class="row">
+                <div class="col-md-6 offset-md-3">
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">稱號類別</span>
+                        </div>
+                        <input type="text" name="inputType" id="inputType" value="{{ .titleData.type }}"
+                            class="form-control" placeholder="選擇稱號類別" aria-label="稱號類別" aria-describedby="inputType" required>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">稱號編號</span>
+                        </div>
+                        <input type="text" name="inputTitleid" id="inputTitleid" value="{{ .titleData.id }}"
+                            class="form-control" placeholder="輸入稱號編號" aria-label="稱號編號" aria-describedby="inputTitleid" required>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">稱號名稱</span>
+                        </div>
+                        <input type="text" name="inputTitleDefaultName" id="inputTitleDefaultName" value="{{ .titleData.defaultname }}"
+                            class="form-control" placeholder="輸入稱號名稱" aria-label="稱號名稱" aria-describedby="inputTitleDefaultName" required>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">稱號男生名稱</span>
+                        </div>
+                        <input type="text" name="inputTitleMaleName" id="inputTitleMaleName" value="{{ .titleData.malename }}"
+                            class="form-control" placeholder="輸入稱號男生名稱" aria-label="稱號男生名稱" aria-describedby="inputTitleMaleName">
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">稱號女生名稱</span>
+                        </div>
+                        <input type="text" name="inputTitleFemaleName" id="inputTitleFemaleName" value="{{ .titleData.femalename }}"
+                            class="form-control" placeholder="輸入稱號女生名稱" aria-label="稱號女生名稱" aria-describedby="inputTitleFemaleName">
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">稱號選單名稱</span>
+                        </div>
+                        <input type="text" name="inputTitleUniName" id="inputTitleUniName" value="{{ .titleData.uniname }}"
+                            class="form-control" placeholder="輸入稱號選單名稱" aria-label="稱號選單名稱" aria-describedby="inputTitleUniName">
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="col">
+                            <a href="/admin/titles" class="btn btn-info active" role="button" aria-pressed="true">回稱號列表</a>
+                        </div>
+                        <div class="col text-center">
+                            {{ if eq .template.method "PUT" }}
+                            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#ModalCenter"
+                                onclick="delAction(false,'')">刪除</button>
+                            {{ end }}
+                        </div>
+                        <div class="col text-right">
+                            <button class="btn btn-primary" type="submit">{{ .template.button }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalTitle">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="ModalContent">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="delAction(true,'/admin/titles/');">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

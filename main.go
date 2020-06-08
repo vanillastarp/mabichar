@@ -89,8 +89,12 @@ func main() {
 	app.PartyFunc("/api", func(api iris.Party) {
 		api.Use(authentication)
 		api.Get("/GetSkills", func(ctx iris.Context) { ctx.JSON(APIGetSkills()) })
+		api.Get("/GetTalents", func(ctx iris.Context) { ctx.JSON(APIGetTalents()) })
 		api.Get("/GetServers", func(ctx iris.Context) { ctx.JSON(APIGetServers()) })
 		api.Get("/GetCharacters", func(ctx iris.Context) { ctx.JSON(APIGetCharacters(sessions.Get(ctx).Get("_id").(primitive.ObjectID))) })
+		api.Get("/GetSkillTypes", func(ctx iris.Context) { ctx.JSON(APIGetSkillTypes()) })
+		api.Get("/GetTalentTypes", func(ctx iris.Context) { ctx.JSON(APIGetTalentTypes()) })
+
 	})
 
 	app.PartyFunc("/user", func(user iris.Party) {
@@ -126,12 +130,18 @@ func main() {
 		user.Get("/", GetAdminIndex)
 		user.Get("/game_version", GetGameVersion)
 		user.Get("/achievements", GetAchievements)
-		user.Get("/skills", GetSkills)
 
 		user.Get("/pets", GetPets)
 		user.Get("/collections", GetCollections)
 		user.Get("/events", GetEvents)
 		user.Get("/stories", GetStories)
+
+		user.Get("/skills", GetSkills)                                             //列出技能清單
+		user.Get("/skills/create", GetSkillCreate)                                 //新增技能表單
+		user.Post("/skills/create", PostSkillCreate)                               //新增技能資料
+		user.Get("/skills/{skillid: int}/edit", GetSkillEdit)                      //編輯技能表單
+		user.Put("/skills/{_id: string regexp([0-9a-f]) max(24)}", PutSkillUpdate) //更新技能資料
+		user.Delete("/skills/{_id: string regexp([0-9a-f]) max(24)}", DelSkill)    //刪除技能資料
 
 		user.Get("/titles", GetTitles)                                             //列出稱號清單
 		user.Get("/titles/create", GetTitleCreate)                                 //新增稱號表單
@@ -143,7 +153,7 @@ func main() {
 		user.Get("/talentmasters", GetTalentMasters)                                             //列出才能清單
 		user.Get("/talentmasters/create", GetTalentMasterCreate)                                 //新增才能表單
 		user.Post("/talentmasters/create", PostTalentMasterCreate)                               //新增才能資料
-		user.Get("/talentmasters/{titleid: int}/edit", GetTalentMasterEdit)                      //編輯才能表單
+		user.Get("/talentmasters/{talentid: int}/edit", GetTalentMasterEdit)                     //編輯才能表單
 		user.Put("/talentmasters/{_id: string regexp([0-9a-f]) max(24)}", PutTalentMasterUpdate) //更新才能資料
 		user.Delete("/talentmasters/{_id: string regexp([0-9a-f]) max(24)}", DelTalentMaster)    //刪除才能資料
 
