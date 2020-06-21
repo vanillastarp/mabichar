@@ -2,7 +2,7 @@
 <script src="/static/js/admin_functions.js"></script>
 <script>
   $( document ).ready(function() {
-      
+    GetTitleTypesToList();
   });
 </script>
 {{ end }}
@@ -15,14 +15,16 @@
         <form name="EditForm" method="POST" action='{{ .template.action }}{{ .titleData._id.Hex }}'>
             <input type="hidden" name="_id" id="_id" value="{{ .titleData._id.Hex }}"/>
             <input type="hidden" name="_method" value='{{ .template.method }}'>
+            <input type="hidden" name="type" id="type" value='{{ .titleData.type }}'>
             <div class="row">
                 <div class="col-md-6 offset-md-3">
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text">稱號類別</span>
                         </div>
-                        <input type="text" name="inputType" id="inputType" value="{{ .titleData.type }}"
-                            class="form-control" placeholder="選擇稱號類別" aria-label="稱號類別" aria-describedby="inputType" required>
+                        <select class="custom-select" name="inputType" id="inputType">
+                            <option value="0" selected>請選擇</option>
+                        </select>
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">

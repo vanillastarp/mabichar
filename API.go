@@ -158,6 +158,26 @@ func APIGetTalents() []bson.M {
 	return res
 }
 
+//APIGetTitles 提供稱號清單
+func APIGetTitles() []bson.M {
+	res, err := APIQueryBase("admin_Titles", bson.M{})
+	if err != nil {
+		log.Println(err.Error())
+		return []bson.M{}
+	}
+	return res
+}
+
+//APIGetPets 提供稱號清單
+func APIGetPets() []bson.M {
+	res, err := APIQueryBase("admin_Pets", bson.M{})
+	if err != nil {
+		log.Println(err.Error())
+		return []bson.M{}
+	}
+	return res
+}
+
 //APIGetServers 提供伺服器清單
 func APIGetServers() []bson.M {
 	res, err := APIQueryBase("admin_Servers", bson.M{})
@@ -230,10 +250,47 @@ func APIGetTalentTypes() map[int]string {
 	return talentTypes
 }
 
-// //APIGetTitleType 提供稱號編號範圍
-// func APIGetTitleType() map[int]string {
+//APIGetTitleTypes 提供稱號類別
+func APIGetTitleTypes() map[int]string {
+	titleTypes := map[int]string{
+		1:  "一般稱號",
+		2:  "新手稱號",
+		3:  "兼職稱號",
+		4:  "封印石稱號",
+		5:  "主線",
+		6:  "遺跡",
+		7:  "活動",
+		8:  "大師",
+		9:  "遊戲內容",
+		10: "第二稱號",
+		11: "怪物稱號",
+		12: "變身稱號",
+		13: "寵物稱號",
+		14: "GM",
+		15: "未分類",
+	}
+	return titleTypes
+}
 
-// }
+//APIGetPetTypes 提供寵物類別
+func APIGetPetTypes() map[int]string {
+	petTypes := map[int]string{
+		1:  "一般寵物",
+		2:  "騎乘寵物",
+		3:  "飛行寵物",
+		4:  "特效寵物",
+		5:  "採集寵物",
+		6:  "撿拾寵物",
+		7:  "跳舞寵物",
+		8:  "尋寶寵物",
+		9:  "變身寵物",
+		10: "歌唱寵物",
+		11: "合體化",
+		19: "未分類",
+		20: "夥伴",
+	}
+	return petTypes
+}
 
 /*
 //----------------------------------------------

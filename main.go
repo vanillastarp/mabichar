@@ -90,10 +90,15 @@ func main() {
 		api.Use(authentication)
 		api.Get("/GetSkills", func(ctx iris.Context) { ctx.JSON(APIGetSkills()) })
 		api.Get("/GetTalents", func(ctx iris.Context) { ctx.JSON(APIGetTalents()) })
+		api.Get("/GetTitles", func(ctx iris.Context) { ctx.JSON(APIGetTitles()) })
+		api.Get("/GetPets", func(ctx iris.Context) { ctx.JSON(APIGetPets()) })
 		api.Get("/GetServers", func(ctx iris.Context) { ctx.JSON(APIGetServers()) })
 		api.Get("/GetCharacters", func(ctx iris.Context) { ctx.JSON(APIGetCharacters(sessions.Get(ctx).Get("_id").(primitive.ObjectID))) })
+
 		api.Get("/GetSkillTypes", func(ctx iris.Context) { ctx.JSON(APIGetSkillTypes()) })
 		api.Get("/GetTalentTypes", func(ctx iris.Context) { ctx.JSON(APIGetTalentTypes()) })
+		api.Get("/GetTitleTypes", func(ctx iris.Context) { ctx.JSON(APIGetTitleTypes()) })
+		api.Get("/GetPetTypes", func(ctx iris.Context) { ctx.JSON(APIGetPetTypes()) })
 
 	})
 
@@ -131,10 +136,16 @@ func main() {
 		user.Get("/game_version", GetGameVersion)
 		user.Get("/achievements", GetAchievements)
 
-		user.Get("/pets", GetPets)
 		user.Get("/collections", GetCollections)
 		user.Get("/events", GetEvents)
 		user.Get("/stories", GetStories)
+
+		user.Get("/pets", GetPets)                                             //列出寵物清單
+		user.Get("/pets/create", GetPetCreate)                                 //新增寵物表單
+		user.Post("/pets/create", PostPetCreate)                               //新增寵物資料
+		user.Get("/pets/{petid: int}/edit", GetPetEdit)                        //編輯寵物表單
+		user.Put("/pets/{_id: string regexp([0-9a-f]) max(24)}", PutPetUpdate) //更新寵物資料
+		user.Delete("/pets/{_id: string regexp([0-9a-f]) max(24)}", DelPet)    //刪除寵物資料
 
 		user.Get("/skills", GetSkills)                                             //列出技能清單
 		user.Get("/skills/create", GetSkillCreate)                                 //新增技能表單
@@ -350,7 +361,7 @@ func authenticatedGuest(ctx iris.Context) {
 
 //RunningLog  記錄使用者瀏覽路徑
 func RunningLog(ctx iris.Context) {
-	ctx.Application().Logger().Infof("Runs method:%s %s", ctx.Method(), ctx.Path())
+	ctx.Application().Logger().Infof("Runs:%s %s", ctx.Method(), ctx.Path())
 	ctx.Next()
 }
 

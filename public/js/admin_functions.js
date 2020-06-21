@@ -46,15 +46,46 @@ function GetTalentsToList() {
     });
 }
 
+function GetTitlesToList() {
+    $.get("/api/GetTitles", function (data) {
+        $(data).each(function (key, val) {
+            row =
+                "<tr>" +
+                    "<td scope=\"row\">" + val["id"] + "</td>" +
+                    "<td>" + val["type"] + "</td>" +
+                    "<td>" + val["defaultname"] + "</td>" +
+                    "<td>" + val["malename"]+"/"+val["femalename"]+"/"+val["uniname"] + "</td>" +
+                    "<td><a class=\"btn btn-primary\" href=\"/admin/titles/" + val["id"] + "/edit\" role=\"button\">編輯</a></td>" +
+                "</tr>";
+            $("#s" + val["type"] + " tbody").append(row);
+        });
+    });
+}
+
+function GetPetsToList() {
+    $.get("/api/GetPets", function (data) {
+        $(data).each(function (key, val) {
+            row =
+                "<tr>" +
+                    "<td scope=\"row\">" + val["ID"] + "</td>" +
+                    "<td>" + val["type"] + "</td>" +
+                    "<td>" + val["localName"] + "</td>" +
+                    "<td><a class=\"btn btn-primary\" href=\"/admin/pets/" + val["ID"] + "/edit\" role=\"button\">編輯</a></td>" +
+                "</tr>";
+            $("#s" + val["type"] + " tbody").append(row);
+        });
+    });
+}
+
 function GetSkillTypesToList() {
     $.get("/api/GetSkillTypes", function (data) {
         $.each(data, function (key, val) {
             skilltype = "<option value=\"" + key + "\">" + val + "</option>";
             $("#inputSkillType").append(skilltype);
         });
-        $("#inputSkillType").val($("#skilltype").val());
-        $("#inputRace").val($("#race").val());
-        $("#inputUpgrade").val($("#upgrade").val());
+        if($("#skilltype").val()!="") $("#inputSkillType").val($("#skilltype").val());
+        if($("#race").val()!="") $("#inputRace").val($("#race").val());
+        if($("#upgrade").val()!="") $("#inputUpgrade").val($("#upgrade").val());
     });
 }
 
@@ -64,6 +95,26 @@ function GetTalentTypesToList() {
             talenttype = "<option value=\"" + key + "\">" + val + "</option>";
             $("#inputCategory").append(talenttype);
         });
-        $("#inputCategory").val($("#Category").val());
+        if($("#Category").val()!="") $("#inputCategory").val($("#Category").val());
+    });
+}
+
+function GetTitleTypesToList() {
+    $.get("/api/GetTitleTypes", function (data) {
+        $.each(data, function (key, val) {
+            titletype = "<option value=\"" + key + "\">" + val + "</option>";
+            $("#inputType").append(titletype);
+        });
+        if($("#type").val()!="") $("#inputType").val($("#type").val());
+    });
+}
+
+function GetPetTypesToList() {
+    $.get("/api/GetPetTypes", function (data) {
+        $.each(data, function (key, val) {
+            titletype = "<option value=\"" + key + "\">" + val + "</option>";
+            $("#inputType").append(titletype);
+        });
+        if($("#type").val()!="") $("#inputType").val($("#type").val());
     });
 }

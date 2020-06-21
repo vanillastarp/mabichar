@@ -229,7 +229,12 @@ func DelSkill(ctx iris.Context) {
 
 //GetTitles 列出稱號清單
 func GetTitles(ctx iris.Context) {
-	GetAdminListBase(ctx, "admin_Titles", "titlesList")
+	session := sessions.Get(ctx)
+	ctx.ViewData("titletypes", APIGetTitleTypes())
+	ctx.ViewData("message", session.GetFlashString("msg"))
+	if err := ctx.View("admin/titlesList.html"); err != nil {
+		ctx.Application().Logger().Infof(err.Error())
+	}
 }
 
 //GetTitleCreate 新增稱號表單
@@ -261,7 +266,7 @@ func PostTitleCreate(ctx iris.Context) {
 //GetTitleEdit 編輯稱號表單
 func GetTitleEdit(ctx iris.Context) {
 	filter := bson.M{
-		"titleid": APIParseInt(ctx.Params().Get("titleid")),
+		"id": APIParseInt(ctx.Params().Get("titleid")),
 	}
 
 	GetAdminEditBase(ctx, "admin_Titles", filter, "titles", "titleData", "titlesForm")
@@ -381,9 +386,74 @@ func DelTalentMaster(ctx iris.Context) {
 
 //------------------- Pets --------------------
 
-//GetPets 寵物列表
+//GetPets 列出寵物清單
 func GetPets(ctx iris.Context) {
-	ctx.Writef("寵物列表")
+	session := sessions.Get(ctx)
+	ctx.ViewData("pettypes", APIGetPetTypes())
+	ctx.ViewData("message", session.GetFlashString("msg"))
+	if err := ctx.View("admin/petsList.html"); err != nil {
+		ctx.Application().Logger().Infof(err.Error())
+	}
+}
+
+//GetPetCreate 新增寵物表單
+func GetPetCreate(ctx iris.Context) {
+	GetAdminCreateBase(ctx, "pets", "petsForm")
+}
+
+//PostPetCreate 新增寵物資料
+func PostPetCreate(ctx iris.Context) {
+	/*
+		inputType
+		inputPetid
+		inputPetName
+	*/
+	insertData := bson.M{
+		"type":      APIParseInt(ctx.PostValue("inputType")),
+		"ID":        APIParseInt(ctx.PostValue("inputPetid")),
+		"localName": ctx.PostValue("inputPetName"),
+	}
+	PostAdminCreateBase(ctx, "admin_Pets", insertData, "pets")
+}
+
+//GetPetEdit 編輯寵物表單
+func GetPetEdit(ctx iris.Context) {
+	filter := bson.M{
+		"ID": APIParseInt(ctx.Params().Get("petid")),
+	}
+
+	GetAdminEditBase(ctx, "admin_Pets", filter, "pets", "petData", "petsForm")
+}
+
+//PutPetUpdate 更新寵物資料
+func PutPetUpdate(ctx iris.Context) {
+	if id, err := primitive.ObjectIDFromHex(ctx.PostValue("_id")); err != nil {
+		session := sessions.Get(ctx)
+		session.SetFlash("msg", "primitive.ObjectIDFromHex ERROR: "+err.Error())
+		ctx.Redirect("/admin/talentmasters")
+	} else {
+		/*
+			inputType
+			inputPetid
+			inputPetName
+		*/
+		filter := bson.M{
+			"_id": id,
+		}
+		updateData := bson.M{
+			"$set": bson.M{
+				"type":      APIParseInt(ctx.PostValue("inputType")),
+				"ID":        APIParseInt(ctx.PostValue("inputPetid")),
+				"localName": ctx.PostValue("inputPetName"),
+			}}
+
+		PutAdminUpdateBase(ctx, "admin_Pets", filter, updateData, "pets")
+	}
+}
+
+//DelPet 刪除寵物資料
+func DelPet(ctx iris.Context) {
+	DelAdminBase(ctx, "admin_Pets", "pets")
 }
 
 //------------------- Collections --------------------

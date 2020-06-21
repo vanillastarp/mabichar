@@ -1,21 +1,21 @@
-{{ define "admin/titlesList-head" }}
+{{ define "admin/petsList-head" }}
 <script src="/static/js/admin_functions.js"></script>
 <script>
   $( document ).ready(function() {
-    GetTitlesToList();
+    GetPetsToList();
   });
 </script>
 {{ end }}
 
-{{ define "admin/titlesList-body" }}
+{{ define "admin/petsList-body" }}
 <main role="main" class="container">
   <p class="text-right">
     <span>{{ .message }}</span>
-    <a class="btn btn-primary" href="/admin/titles/create" role="button">新增稱號</a>
+    <a class="btn btn-primary" href="/admin/pets/create" role="button">新增寵物</a>
   </p>
   
-  <ul class="nav nav-tabs" id="titleListTab" role="tablist">
-    {{ range $i, $v := .titletypes }}
+  <ul class="nav nav-tabs" id="petListTab" role="tablist">
+    {{ range $i, $v := .pettypes }}
     <li class="nav-item">
       <a class="nav-link{{if eq $i 1}} active {{ end }}" id="s{{ $i }}-tab" data-toggle="tab"
         href="#s{{ $i }}" role="tab" aria-controls="s{{ $i }}" {{if eq $i 1}} aria-selected="true"
@@ -24,8 +24,8 @@
     {{ end }}
   </ul>
 
-  <div class="tab-content" id="titleListTabContent">
-    {{ range $i, $v := .titletypes }}
+  <div class="tab-content" id="petListTabContent">
+    {{ range $i, $v := .pettypes }}
     <div class="tab-pane fade{{if eq $i 1}} show active{{ end }}" id="s{{ $i }}" role="tabpanel" aria-labelledby="s{{ $i }}-tab">
       <table class="table table-sm table-bordered">
         <thead>
@@ -33,7 +33,6 @@
             <th scope="col">#</th>
             <th scope="col">類別</th>
             <th scope="col">名稱</th>
-            <th scope="col">別稱</th>
             <th scope="col">編輯</th>
           </tr>
         </thead>

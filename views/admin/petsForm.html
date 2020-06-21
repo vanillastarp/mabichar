@@ -1,0 +1,83 @@
+{{ define "admin/petsForm-head" }}
+<script src="/static/js/admin_functions.js"></script>
+<script>
+  $( document ).ready(function() {
+    GetPetTypesToList();
+  });
+</script>
+{{ end }}
+
+{{ define "admin/petsForm-body" }}
+<div class="container">
+    <h1 class="mt-4">{{ .template.banner }}寵物</h1>
+    <hr>
+    <div class="jumbotron">
+        <form name="EditForm" method="POST" action='{{ .template.action }}{{ .petData._id.Hex }}'>
+            <input type="hidden" name="_id" id="_id" value="{{ .petData._id.Hex }}"/>
+            <input type="hidden" name="_method" value='{{ .template.method }}'>
+            <input type="hidden" name="type" id="type" value='{{ .petData.type }}'>
+            <div class="row">
+                <div class="col-md-6 offset-md-3">
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">寵物類別</span>
+                        </div>
+                        <select class="custom-select" name="inputType" id="inputType">
+                            <option value="0" selected>請選擇</option>
+                        </select>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">寵物編號</span>
+                        </div>
+                        <input type="text" name="inputPetid" id="inputPetid" value="{{ .petData.ID }}"
+                            class="form-control" placeholder="輸入寵物編號" aria-label="寵物編號" aria-describedby="inputPetid" required>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">寵物名稱</span>
+                        </div>
+                        <input type="text" name="inputPetName" id="inputPetName" value="{{ .petData.localName }}"
+                            class="form-control" placeholder="輸入寵物名稱" aria-label="寵物名稱" aria-describedby="inputPetName" required>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="col">
+                            <a href="/admin/pets" class="btn btn-info active" role="button" aria-pressed="true">回寵物列表</a>
+                        </div>
+                        <div class="col text-center">
+                            {{ if eq .template.method "PUT" }}
+                            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#ModalCenter"
+                                onclick="delAction(false,'')">刪除</button>
+                            {{ end }}
+                        </div>
+                        <div class="col text-right">
+                            <button class="btn btn-primary" type="submit">{{ .template.button }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalTitle">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="ModalContent">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="delAction(true,'/admin/pets/');">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}
